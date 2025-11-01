@@ -10,6 +10,13 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+// create personalityClassifier object, participant list
+//read the file line by line
+// check missing values, incorrect format and out of range errors
+// extract data and assign to respective participant attributes
+// create participant object loading the extracted data
+//add the created objects to the list
+
 
 public class FileService implements FileServiceInt {
 
@@ -36,10 +43,10 @@ public class FileService implements FileServiceInt {
 
             //check for missing fields -> how does it have to be handled
                 if (values.length < fieldCount) {
-                    System.out.println("Structural Error.Missing data fields");
+                    System.err.println("Structural Error.Missing data fields");
                     continue;
                 }
-                //check if skillLevel and personalityScore are numbers
+                //check if skillLevel and personalityScore are numbers(format)
                 int skillLevel;
                 int personalityScore;
                 String personalityType;
@@ -49,11 +56,11 @@ public class FileService implements FileServiceInt {
                     skillLevel = Integer.parseInt(values[4].trim());
                     personalityScore = Integer.parseInt(values[6].trim());
                 } catch (NumberFormatException e) {
-                    System.out.println("Format error. SkillLevel or Score is not a number");
+                    System.err.println("Format error. SkillLevel or Score is not a number");
                     continue;
                 }
 
-                //Range check
+                //Range error check
                 try{
                     if(skillLevel < 1 || skillLevel > 10) {
                         throw new InvalidMidiDataException("Skill Level("+skillLevel+") is outside the range 1-10 range");
