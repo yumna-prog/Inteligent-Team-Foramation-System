@@ -4,11 +4,25 @@ package com.gameclub.team.model;
 public class Participant {
 
     private String playerId;
+    private String name;
+    private String emailMail;
     private String preferredGame;
     private int skillLevel;
     private String preferredRole;
     private int personalityScore;
     private String personalityType;      //PersonalityClassifier Datatype
+
+
+    public Participant(String playerId, String name, String emailMail, String preferredGame, int skillLevel, String preferredRole, int personalityScore, String personalityType) {
+        this.playerId = playerId;
+        this.name = name;
+        this.emailMail = emailMail;
+        this.preferredGame = preferredGame;
+        this.skillLevel = skillLevel;
+        this.preferredRole = preferredRole;
+        this.personalityScore = personalityScore;
+        this.personalityType = personalityType;
+    }
 
     public Participant() {
     }
@@ -21,6 +35,26 @@ public class Participant {
         this.personalityType = personalityType;
         this.skillLevel = skillLevel;
     }
+    public void setPlayerId(String playerId) {
+        this.playerId = playerId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmailMail() {
+        return emailMail;
+    }
+
+    public void setEmailMail(String emailMail) {
+        this.emailMail = emailMail;
+    }
+
 
     public String getPlayerId() {
         return playerId;
