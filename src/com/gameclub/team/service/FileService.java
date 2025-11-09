@@ -17,7 +17,7 @@ import java.io.IOException;
 // create participant object loading the extracted data
 //add the created objects to the list
 
-
+//File Handling
 public class FileService implements FileServiceInt {
 
     private final PersonalityClassifier classifier = new PersonalityClassifier();  // the personality can only be assigned once

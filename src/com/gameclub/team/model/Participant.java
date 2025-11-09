@@ -1,5 +1,6 @@
 package com.gameclub.team.model;
 
+//Represents an individual member
 public class Participant {
 
     private String playerId;

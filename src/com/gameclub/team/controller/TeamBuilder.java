@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+//Implements the matching algorithm
 public class TeamBuilder {
 
     public List<Team> loadTeams(List<Participant> participants, int teamSize) {

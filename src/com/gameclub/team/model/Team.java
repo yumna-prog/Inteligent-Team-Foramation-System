@@ -1,5 +1,6 @@
 package com.gameclub.team.model;
 
+//Represents a collection of members
 public class Team {
 
 
