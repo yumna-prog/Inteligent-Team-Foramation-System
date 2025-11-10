@@ -7,7 +7,7 @@ public class Participant {
     private String name;
     private String emailMail;
     private String preferredGame;
-    private int skillLevel;
+    private int skillLevel; //-> how does the survey data provides this
     private String preferredRole;
     private int personalityScore;
     private String personalityType;      //PersonalityClassifier Datatype
