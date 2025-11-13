@@ -9,7 +9,6 @@ import java.util.List;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
 // create personalityClassifier object, participant list
 //read the file line by line
 // check missing values, incorrect format and out of range errors
@@ -17,8 +16,40 @@ import java.io.IOException;
 // create participant object loading the extracted data
 //add the created objects to the list
 
+
 //File Handling
 public class FileService implements FileServiceInt {
+
+
+    //dummy method for the core logic
+    public List<Participant> readAllParticipants(){
+        List<Participant> participants = new ArrayList<>();
+
+        //add the participant objects to a list
+        participants.add(new Participant("Alex","Valorant", 10, "Defender", "Leader", 19));
+        participants.add(new Participant("Ben", "Dota",9,"Attacker", "Balanced", 17));
+        participants.add(new Participant("Chris", "FIFA",8, "Midfielder", "Thinker", 15));
+        participants.add(new Participant("David", "Valorant",7,  "Defender", "Balanced", 15));
+
+        return participants;
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     private final PersonalityClassifier classifier = new PersonalityClassifier();  // the personality can only be assigned once
     private static final int fieldCount = 8; // only data from 7 fields are needed, the variable should be used across all objects
@@ -82,10 +113,10 @@ public class FileService implements FileServiceInt {
                 personalityType = classifier.classify(personalityScore);
 
                 //Create Participant object using extracted data
-                Participant participant = new Participant(playerId, preferredGame, skillLevel, preferredRole, personalityScore, personalityType);
+                //Participant participant = new Participant(playerId, preferredGame, skillLevel, preferredRole, personalityScore, personalityType);
 
                 //Add object to the list
-                participants.add(participant);
+                //participants.add(participant);
 
             }
 

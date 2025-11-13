@@ -12,29 +12,32 @@ public class Participant {
     private int personalityScore;
     private String personalityType;      //PersonalityClassifier Datatype
 
+    private int compositeScore;
 
-    public Participant(String playerId, String name, String emailMail, String preferredGame, int skillLevel, String preferredRole, int personalityScore, String personalityType) {
-        this.playerId = playerId;
+
+    public Participant(String name, String preferredGame, int skillLevel, String preferredRole,String personalityType, int compositeScore) {
+
         this.name = name;
-        this.emailMail = emailMail;
         this.preferredGame = preferredGame;
         this.skillLevel = skillLevel;
         this.preferredRole = preferredRole;
-        this.personalityScore = personalityScore;
+        //this.personalityScore = personalityScore;
         this.personalityType = personalityType;
+        this.compositeScore = compositeScore;
+
     }
 
     public Participant() {
     }
 
-    public Participant(String playerId, String preferredGame,int skillLevel, String preferredRole, int personalityScore, String personalityType) {
-        this.playerId = playerId;
-        this.preferredGame = preferredGame;
-        this.preferredRole = preferredRole;
-        this.personalityScore = personalityScore;
-        this.personalityType = personalityType;
-        this.skillLevel = skillLevel;
-    }
+//    public Participant(String playerId, String preferredGame,int skillLevel, String preferredRole, int personalityScore, String personalityType) {
+//        this.playerId = playerId;
+//        this.preferredGame = preferredGame;
+//        this.preferredRole = preferredRole;
+//        this.personalityScore = personalityScore;
+//        this.personalityType = personalityType;
+//        this.skillLevel = skillLevel;
+//    }
     public void setPlayerId(String playerId) {
         this.playerId = playerId;
     }
@@ -98,6 +101,10 @@ public class Participant {
 
     public void setSkillLevel(int SkillLevel) {
         skillLevel = SkillLevel;
+    }
+
+    public int getCompositeScore() {
+        return getSkillLevel() + getPersonalityScore();
     }
 
 

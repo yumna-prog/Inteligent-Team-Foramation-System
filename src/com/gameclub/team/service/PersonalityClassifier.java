@@ -1,5 +1,7 @@
 package com.gameclub.team.service;
 
+import com.gameclub.team.model.Participant;
+
 public class PersonalityClassifier{
 
     //Check for Leader -> 90-100
@@ -20,5 +22,9 @@ public class PersonalityClassifier{
             return "null";
 
         }
+    }
+    //dummy composite score calculation for core logic
+    public int calculateCompositeScore(Participant p) {
+        return p.getSkillLevel() + p.getPersonalityScore();
     }
 }

@@ -3,7 +3,9 @@ package com.gameclub.team.controller;
 import com.gameclub.team.model.Participant;
 import com.gameclub.team.model.Team;
 
+import java.sql.ClientInfoStatus;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -11,25 +13,78 @@ import java.util.List;
 //      participant in a arraylist ->
 
 //Algorithm
-//1. The composite score = personality score +skill level is calculated for each participant
-//2. The participants will be sorted based on the composite score
-//3. The sorted participants  will be distributed using the snake-draft
-    //a. initializes the required number of empty teams based on number of participants and team size
-    //b. Forward distribution round
-        // assign the players for each team from the highest rank accordingly
-    //c. Turning point
-        //Once a player has been assigned to the very last team, the algo revers the direction
-    //d. Backwards distribution round
-        //assign the players for each team moving backwards, start from the team that last assigned
-    // Repeat until all players are assigned
+//1. The composite score = personality score +skill level is calculated for each participant -> done in Participant class
+public class TeamBuilder {
 
+//2. The participants will be sorted based on the composite score
+    public List<Participant> sortParticipants(List<Participant> listOfParticipants) {
+        //sort using Comparator, descending order by composite score
+        listOfParticipants.sort(Comparator.comparingInt(Participant::getCompositeScore));
+        return  listOfParticipants;
+    }
+
+//3. The sorted participants  will be distributed using the snake-draft
+
+    //a. initializes the required number of empty teams based on number of participants and team size
+    int numTeams;
+
+    public List<Team> formTeams(List<Participant> listOfParticipants,  int numTeams) {
+
+        //Initialize the teams list
+        List<Team> teams = new ArrayList<>(numTeams);
+
+        //initialize the empty team objects
+        for (int j = 0; j < numTeams; j++) {
+            teams.add(new Team());
+        }
+
+        int teamIndex = 0;
+        int direction= 1;
+
+        // get the current player at index i
+        for (Participant currentPlayer : listOfParticipants) {
+            //b. Forward distribution round
+
+            // assign the players for each team from the highest rank accordingly
+            teams.get(teamIndex).addPlayers(currentPlayer);
+
+            if (direction == 1) {
+                teamIndex++;
+
+                //c. Turning point
+                //Once a player has been assigned to the very last team, the algo revers the direction
+                if (teamIndex == numTeams) {
+                    direction = -1;
+                    teamIndex = numTeams - 1;
+                }
+
+            }
+            //d. Backwards distribution round
+            //assign the players for each team moving backwards, start from the team that last assigned
+
+            else {
+                teamIndex--;
+                if (teamIndex < 0) {
+                    direction = 1;
+                    teamIndex = 0;
+                }
+            }
+        }
+        return teams;
+
+    }
 //4. Check for the constraints
 // The algorithm checks a constraint, and if it fails, it fixes the failure, and then checks all constraints again until every rule is met.
     //a. Check the cap for each game -
-        //initialize the cap per game
-        // iterate  through each team and count how many players prefer each game type
-        // algorithm compares the count for the most common game against the defined cap
+    //initialize the cap per game
+    // iterate  through each team and count how many players prefer each game type
+    // algorithm compares the count for the most common game against the defined cap
     //IF FAILS ->
+
+
+}
+
+
 
     //b. Check for role diversity -
         //initialize the minimum unique roles per team
@@ -82,79 +137,6 @@ import java.util.List;
 
 
 
-
-
-
-
-
-
-
-
-//Implements the matching algorithm
-public class TeamBuilder {
-
-    public List<Team> loadTeams(List<Participant> participants, int teamSize) {
-        //1. get the team size, given by user
-
-        //2.calculate the number of participants
-        int numberOfParticipants = participants.size();
-
-        //3.calculate the number of teams
-        int numberOfTeams = (int) Math.ceil((double) numberOfParticipants/teamSize);
-
-        //4. initialize team list
-        List<Team> teams = new ArrayList<>(numberOfTeams);
-
-        //5. instantiate teams
-        for (int i = 0; i < numberOfTeams; i++) {
-            teams.add(new Team("Team - "+ (i+1),teamSize));
-        }
-        //Sorting -> the highest skill level to lowest
-        //1. use builtin sorting utility
-        //2. define comparator -> from each participant object extract score, it  compares the skill level of participant with each other
-        //sort it in the descending order
-        participants.sort(Comparator.comparing(Participant::getSkillLevel).reversed());
-
-
-
-        //core Logic -> calculate the correct teamIndex
-
-        for  (int i = 0; i < numberOfParticipants; i++) {
-
-            //calculate the position of participant in the block
-            int positionInBlock =  i% numberOfTeams;
-
-            //determine the current block and direction
-
-            int blockIndex = i / numberOfTeams;
-            boolean isReverse = false;
-            if (blockIndex %2 != 0){
-                isReverse = true;
-            }
-            int targetTeamIndex;
-            if (isReverse) {
-                targetTeamIndex = (numberOfTeams - 1) - blockIndex;
-            }
-            else {
-                targetTeamIndex = blockIndex;
-
-            }
-
-            //retrieve the team object
-            Team targetTeam = teams.get(targetTeamIndex);
-            Participant currentParticipant = participants.get(i);
-
-            // VALIDATION LOGIC
-
-
-
-        }
-
-
-        return teams;
-    }
-
-    }
 
 
 
