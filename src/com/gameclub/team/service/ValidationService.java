@@ -107,7 +107,7 @@ public class ValidationService implements ValidationServiceInt {
     //IF FAILS -> what happens to the stored teams
     //1. Identify the player to be removed -> this is the player with the lowest rank(to reduce the impact of avg skill) in the falling team
 
-    public  void fixGameCapFailure(List<Map<String,Object>> failedTeams,List<Team> teams){
+    public void fixGameCapFailure(List<Map<String,Object>> failedTeams,List<Team> teams){
         for(Map<String,Object> failedT : failedTeams){
             Team failedTeam  = (Team)failedT.get("team"); // get the current team from the filed teams
             String violatingGame = (String) failedT.get("violatingGame");
@@ -183,7 +183,7 @@ public class ValidationService implements ValidationServiceInt {
 
             }
             if(failureType != null) {
-                personaFailedTeams.add(team);
+                personaFailedTeams.add(team); // LATER HOW TO ADD THE TYPE
             }
 
         }
@@ -191,6 +191,53 @@ public class ValidationService implements ValidationServiceInt {
 
 
     }
+//    //se if any fixation affects the already fixed constraints
+//    public boolean canAcceptSwap(Participant playerRemoved, Participant playerInserted) {
+//        //for testing
+//        Participant tempPlayers;           //TO BE CONTINUED
+//
+//
+//    }
+
+
+
+
+
+
+
+
+
+
+
+
+    public void fixPersonalityFailure(List<Map<String,Object>> failedTeams,List<Team> teams){
+
+        //give priority to fixing "Leader"
+        for(Map<String,Object> failure : failedTeams){
+           Team failingTeam  = (Team)failure.get("team");
+            if (failure.get("type") =="Leader") {
+
+                // Remove the lowest-ranked 'Balanced' or 'Thinker' player from the failing team
+                Participant playerToRemove = failingTeam.personality_lowestRankedPlayer("Leader");
+
+                Participant playerToSwap = null;
+
+                for (Team Passedteam : teams){
+                    if(Passedteam.getPersonalityCount("Leader") > 1){
+
+                        Participant candidate  = Passedteam.personality_lowestRankedPlayer("Leader");
+
+                        //Check if the swap won't violate Game Cap or Role Diversity
+
+                    }
+                }
+
+            }
+
+        }
+    }
+
+
 
 
 

@@ -131,6 +131,25 @@ public class Team {
         return bestCandidate;
     }
 
+    // find the lowest rank in each personality typw
+
+    //Implement the method for lowest ranked player
+    public Participant personality_lowestRankedPlayer(String personality){
+        Participant lowest_personalityPlayer = null;
+        for(Participant p : members){
+            if(p.getPersonalityType().equalsIgnoreCase(personality)){
+                if(lowest_personalityPlayer == null ||p.getCompositeScore() < lowest_personalityPlayer.getCompositeScore()){
+                    lowest_personalityPlayer = p;
+                }
+
+            }
+
+        }
+        return lowest_personalityPlayer;
+
+    }
+
+
 
 
 

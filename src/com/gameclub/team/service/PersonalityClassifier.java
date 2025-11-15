@@ -23,6 +23,8 @@ public class PersonalityClassifier{
 
         }
     }
+
+
     //dummy composite score calculation for core logic
 //    public int calculateCompositeScore(Participant p) {
 //        return p.getSkillLevel() + p.getPersonalityScore();
