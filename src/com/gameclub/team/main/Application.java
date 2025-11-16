@@ -41,20 +41,33 @@ public class Application {
 
 
          //Select game  Interest
-         int gameInterest = MainController.promptForSelection("\n Select your preferred game (1-5):" +
-                 "\n1. Valorant"+
-                 "\n2. Dota" +
-                 "\n3. FIFA"+
-                 "\n4. Basketball"+
-                 "\n5. Badminton",1,5);
+         int gameInterest = MainController.promptForSelection("""
+                 
+                  Select your preferred game (1-5):\
+                 
+                 1. Valorant\
+                 
+                 2. Dota\
+                 
+                 3. FIFA\
+                 
+                 4. Basketball\
+                 
+                 5. Badminton""",1,5);
 
          //Preferred role
-         int role = MainController.promptForSelection("Select your preferred role (1-5):"+
-                 "\n1. Strategist - Focuses on tactics and planning. Keeps the bigger picture in mind during gameplay "+
-                 "\n2. Attacker - Front line player. Good reflexes, offensive tactics, quick execution."+
-                 "\n3. Defender - Protects and supports team stability. Good under pressure and team-focused"+
-                 "\n4. Supporter - Jack-of-all-trades. Adapts roles, ensures smooth coordination."+
-                 "\n5. Coordinator - Communication lead. Keeps the team informed and organized in real time. ", 1,5);
+         int role = MainController.promptForSelection("""
+                 Select your preferred role (1-5):
+                 
+                 1. Strategist - Focuses on tactics and planning. Keeps the bigger picture in mind during gameplay \
+                 
+                 2. Attacker - Front line player. Good reflexes, offensive tactics, quick execution.\
+                 
+                 3. Defender - Protects and supports team stability. Good under pressure and team-focused\
+                 
+                 4. Supporter - Jack-of-all-trades. Adapts roles, ensures smooth coordination.\
+                 
+                 5. Coordinator - Communication lead. Keeps the team informed and organized in real time.\s""", 1,5);
 
 
 
