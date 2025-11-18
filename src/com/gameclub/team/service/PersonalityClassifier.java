@@ -8,7 +8,7 @@ public class PersonalityClassifier{
             // Balanced -> 70-89
             // Thinker -> 50-69
     // else -> ????????
-    public String classify(int normalizedScore) {
+    public String classify(double normalizedScore) {
         if (normalizedScore >= 90) {
             return "Leader";
         }
@@ -25,21 +25,5 @@ public class PersonalityClassifier{
 
     }
 
-//    //get the personality count for team
-//    public int getPersonalityCount(String personality){
-//        int personalityCount = 0;
-//
-//        if(personality == null){
-//            return 0;
-//        }
-//        for(Participant p : members){
-//            if(p.getPersonalityType()!= null && p.getPersonalityType().equalsIgnoreCase(personality)){
-//                personalityCount++;
-//
-//            }
-//
-//        }
-//        return personalityCount;
-//    }
 
 }

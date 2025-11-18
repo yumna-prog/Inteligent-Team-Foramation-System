@@ -19,7 +19,7 @@ public class TeamBuilder implements TeamFormationInt {
 //2. The participants will be sorted based on the composite score
     public List<Participant> sortParticipants(List<Participant> listOfParticipants) {
         //sort using Comparator, descending order by composite score
-        listOfParticipants.sort(Comparator.comparingInt(Participant::getCompositeScore));
+        //listOfParticipants.sort(Comparator.comparingInt(Participant::getCompositeScore));
         return  listOfParticipants;
     }
 

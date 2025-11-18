@@ -6,8 +6,24 @@ import java.util.List;
 public class Team {
 
 
-    private int teamSize;
     private String Name;
+    //participant list
+    //INDICATION OF AGGREGATION - the team has participants but the participants can exist without the team
+    private final List<Participant> members;
+
+
+    //Default initialization
+    public Team() {
+        this.members = new ArrayList<>(); // what creating a team object a list will be created to add the members
+        this.Name = "Team";
+    }
+
+    //with name
+    public Team(String name) {
+        this.Name = name;
+        this.members = new ArrayList<>();
+
+    }
 
     public String getTeamName() {
         return Name;
@@ -16,77 +32,19 @@ public class Team {
         Name = teamName;
     }
 
-    //participant list
-    //INDICATION OF AGGREGATION - the team has participants but the participants can exist without the team
-    private List<Participant> members;
-
-    public Team() {
-        members = new ArrayList<>(); // what creating a team object a list will be created to add the members
-         }
-
-    public int getTeamSize() {
-        return teamSize;
-    }
-
-    public void setTeamSize(int teamSize) {
-        this.teamSize = teamSize;
-    }
     //add participants
     public void addPlayers(Participant p) {
         members.add(p);
 
     }
     //remove player
-    public boolean removePlayer(Participant p) {
-        return members.remove(p);
+    public void removePlayer(Participant p) {
+        members.remove(p);
     }
     //get the participants
     public List<Participant> getMembers() {
         return members;
     }
-
-    public Team getTeam() {
-        return this;
-    }
-    public void addPlayers(){
-        Participant p = new Participant();
-        members.add(p);
-    }
-    //get the personality count for team
-    public int getPersonalityCount(String personality){
-        int personalityCount = 0;
-
-        if(personality == null){
-            return 0;
-        }
-        for(Participant p : members){
-            if(p.getPersonalityType()!= null && p.getPersonalityType().equalsIgnoreCase(personality)){
-                personalityCount++;
-
-            }
-
-        }
-        return personalityCount;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     //Implement the method for lowest ranked player
     public Participant lowestRankedPlayerByGame(String game){
@@ -103,7 +61,7 @@ public class Team {
     }
 
     //Find the best player to be swapped
-    public Participant FindBestSwapPlayer (String violatingGame, int targetScore) {
+    public Participant FindBestSwapPlayer (String violatingGame, double targetScore) {
         // Initialize the best candidate
         Participant bestCandidate = null;
 
@@ -131,7 +89,7 @@ public class Team {
         return bestCandidate;
     }
 
-    // find the lowest rank in each personality typw
+    // find the lowest rank in each personality type
 
     //Implement the method for lowest ranked player
     public Participant personality_lowestRankedPlayer(String personality){
@@ -149,6 +107,23 @@ public class Team {
 
     }
 
+
+    //get the personality count for team
+    public int getPersonalityCount(String personality){
+        int personalityCount = 0;
+
+        if(personality == null || personality.isBlank()){
+            return 0;
+        }
+        for(Participant p : members){
+            if(p.getPersonalityType().equalsIgnoreCase(personality)){
+                personalityCount++;
+
+            }
+
+        }
+        return personalityCount;
+    }
 
 
 

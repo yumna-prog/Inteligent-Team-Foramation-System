@@ -8,7 +8,7 @@ import java.util.Objects;
 //Represents an individual member
 public class Participant {
 
-    private String playerId;
+    private final String playerId;
     private String name;
     private String email;
 
@@ -18,13 +18,32 @@ public class Participant {
 
     //Foe each question the rating is taken
     private List<Integer> persona_rating;
-    private int personalityScore;
-    private String personalityType;      //PersonalityClassifier Datatype
+
+    //derived attributes
+    private int raw_personalityScore;
+    private String personalityType;
+    private double compositeScore;
 
 
-    private int compositeScore;
+    //constants for normalization of personalityScore and skill level
+    private static final int max_raw_personalityScore = 25;
+    private static final int max_raw_skillLevel = 10;
 
+    public List<Integer> getPersona_rating() {
+        return persona_rating;
+    }
 
+    public int getRaw_personalityScore() {
+        return raw_personalityScore;
+    }
+    //During survey to collect participant data
+    public Participant (String playerId, String name, String email){
+        this.playerId = playerId;
+        this.name = name;
+        this.email = email;
+
+    }
+    //After survey data Collected
     public Participant(String playerId, String name, String email, String preferredGame, int skillLevel, String preferredRole, List<Integer> persona_rating) {
         this.playerId = playerId;
         this.name = name;
@@ -33,44 +52,46 @@ public class Participant {
         this.preferredGame = preferredGame;
         this.skillLevel = skillLevel;
         this.preferredRole = preferredRole;
-
         this.persona_rating = persona_rating;
-        this.personalityScore = calculatePersonalityScore();
+
+        // calculate raw personality_score
+        this.raw_personalityScore = calculatePersonalityScore();
 
 
+        //calculate personality type
         //assign personality using personality Classifier class
-        // COMPOSITION//
-        PersonalityClassifier classifier = new PersonalityClassifier();
-        this.personalityType = classifier.classify(personalityScore);
 
+        PersonalityClassifier classifier = new PersonalityClassifier();
+        double normalizedScore = (double) this.raw_personalityScore / max_raw_personalityScore *100.0;
+        this.personalityType = classifier.classify(normalizedScore);
+
+        //calculate composite score and normalize
         this.compositeScore = calculateCompositeScore();
 
 
     }
-    public Participant(String playerId, String name, String email, String preferredGame, int skillLevel,String role ,String preferredRole) {}
-
-
-
-    public void setPlayerId(String playerId) {
+    //For file uploading
+    public Participant(String playerId, String name, String email, String preferredGame, int skillLevel, String preferredRole,double normalizedScore,String personalityType){
         this.playerId = playerId;
+        this.name = name;
+        this.email = email;
+        this.preferredGame = preferredGame;
+        this.skillLevel = skillLevel;
+        this.preferredRole = preferredRole;
+        this.personalityType = personalityType;
+        this.raw_personalityScore = (int) Math.round(normalizedScore/100.0 * 25);
     }
+
 
     public String getName() {
         return name;
     }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmailMail() {
+    public String getEmail() {
         return email;
     }
-
     public void setEmailMail(String emailMail) {
         this.email = emailMail;
     }
-
 
     public String getPlayerId() {
         return playerId;
@@ -85,7 +106,7 @@ public class Participant {
     }
 
     public int getPersonalityScore() {
-        return personalityScore;
+        return raw_personalityScore;
     }
 
     public String getPersonalityType() {
@@ -105,7 +126,7 @@ public class Participant {
     }
 
     public void setPersonalityScore(int personalityScore) {
-        this.personalityScore = personalityScore;
+        this.raw_personalityScore = personalityScore;
     }
 
     public void setPersonalityType(String personalityType) {
@@ -122,8 +143,8 @@ public class Participant {
     }
 
 
-    public int getCompositeScore() {
-        return getSkillLevel() + getPersonalityScore();
+    public double getCompositeScore() {
+        return compositeScore;
     }
 
     public int calculatePersonalityScore() {
@@ -136,8 +157,9 @@ public class Participant {
 
     }
 
-    public int calculateCompositeScore() {
-        return this.skillLevel + this.personalityScore;
+    public double calculateCompositeScore() {
+        double normalizedPersonalityScore = (double) this.raw_personalityScore / max_raw_personalityScore +max_raw_skillLevel *100;
+        return this.skillLevel + normalizedPersonalityScore;
     }
 
     @Override

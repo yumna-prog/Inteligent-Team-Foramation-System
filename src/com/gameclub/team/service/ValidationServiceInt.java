@@ -16,7 +16,7 @@ public interface ValidationServiceInt {
 
     //Validations for team formation
     //1.
-    public List<Map<String, Object>> checkGameCap(List<Team> teams, int gameMax);
+//    public List<Map<String, Object>> checkGameCap(List<Team> teams, int gameMax);
 
     //2.
 
