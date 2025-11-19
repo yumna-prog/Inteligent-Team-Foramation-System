@@ -21,6 +21,7 @@ public class Participant {
 
     //derived attributes
     private int raw_personalityScore;
+    private double normalizedScore;
     private String personalityType;
     private double compositeScore;
 
@@ -63,8 +64,7 @@ public class Participant {
 
         PersonalityClassifier classifier = new PersonalityClassifier();
         double normalizedScore = (double) this.raw_personalityScore / max_raw_personalityScore *100.0;
-        this.personalityType = classifier.classify(normalizedScore);
-
+        this.personalityType = classifier.classify(this.normalizedScore);
         //calculate composite score and normalize
         this.compositeScore = calculateCompositeScore();
 
@@ -137,11 +137,9 @@ public class Participant {
         skillLevel = SkillLevel;
     }
 
-
-    public void setCompositeScore(int compositeScore) {
-        this.compositeScore = compositeScore;
+    public double getNormalizedScore() {
+        return this.normalizedScore;
     }
-
 
     public double getCompositeScore() {
         return compositeScore;

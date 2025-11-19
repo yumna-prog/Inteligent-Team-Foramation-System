@@ -2,9 +2,11 @@ package com.gameclub.team.controller;
 
 import com.gameclub.team.model.Participant;
 import com.gameclub.team.service.FileService;
+import com.gameclub.team.service.PersonalityClassifier;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.security.spec.EdECPoint;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -63,12 +65,15 @@ public class SurveyController {
         int q5 = SurveyController.promptPersonalityRating("Q5. I like making quick decisions and adapting in dynamic situations.");
 
         //For personality score calculation
-        List<Integer> personalityScore = Arrays.asList(q1,q2,q3,q4,q5);
+        List<Integer> personalityRatings = Arrays.asList(q1,q2,q3,q4,q5);
+        int rawScore = personalityRatings.stream().mapToInt(Integer::intValue).sum();
+        double normalizedScore = (double) rawScore/25 * 100;
 
+        PersonalityClassifier classifier = new PersonalityClassifier();
+        String personalityType = classifier.classify(normalizedScore);
 
         //Skill Level
         int skillLevel = SurveyController.promptForSelection("\n Select skill Level (1-10): How would you rate your skill?" ,1,10);
-
 
         //Select game  Interest
         int gameInterestIndex = SurveyController.promptForSelection("""
@@ -116,7 +121,8 @@ public class SurveyController {
                 game_option,
                 skillLevel,
                 role_option,
-                personalityScore
+                normalizedScore,
+                personalityType
         );
 
         //Add participants to a list

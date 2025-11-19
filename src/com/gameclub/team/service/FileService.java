@@ -24,7 +24,7 @@ public class FileService implements FileServiceInt {
 
     private String file_path;
     private static final String csv_header = "ID,Name,Email,PreferredGame,SkillLevel,PreferredRole,PersonalityScore,PersonalityType";
-    private static final int max_persona_score = 25;
+    //private static final int max_persona_score = 25;
 
     public FileService(String file_path) {
         this.file_path = file_path;
@@ -40,20 +40,18 @@ public class FileService implements FileServiceInt {
             if (file.length() == 0) {
                 pw.println(csv_header);
             }
-            //Convert the raw ratings to get the data suitable for the csv
-            int rawScore = participant.getPersonalityScore();
-            double normalizedScore = (double) rawScore / max_persona_score * 100;
+            double normalizedScore = participant.getPersonalityScore();
 
 
             //Construct the csv
-            String csvLine = String.format("%s,%s,%s,%s,%d,%s,%d,%s",
+            String csvLine = String.format("%s,%s,%s,%s,%d,%s,%.2f,%s",
                     participant.getPlayerId(),
                     participant.getName(),
                     participant.getEmail(),
                     participant.getPreferredGame(),
                     participant.getSkillLevel(),
                     participant.getPreferredRole(),
-                    normalizedScore,
+                    participant.getNormalizedScore(),
                     participant.getPersonalityType()
             );
 
@@ -68,15 +66,6 @@ public class FileService implements FileServiceInt {
         }
     }
 
-
-    //dummy method for the core logic
-    public List<Participant> readAllParticipants() {
-        List<Participant> participants = new ArrayList<>();
-
-
-        return participants;
-
-    }
 
     //UPLOAD THE DATA
 

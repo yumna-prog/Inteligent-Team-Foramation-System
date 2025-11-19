@@ -4,10 +4,7 @@ import com.gameclub.team.model.Participant;
 import com.gameclub.team.model.Team;
 
 import java.sql.ClientInfoStatus;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 //Input data-> team size N
 //      participant in a arraylist ->
@@ -19,54 +16,61 @@ public class TeamBuilder implements TeamFormationInt {
 //2. The participants will be sorted based on the composite score
     public List<Participant> sortParticipants(List<Participant> listOfParticipants) {
         //sort using Comparator, descending order by composite score
-        //listOfParticipants.sort(Comparator.comparingInt(Participant::getCompositeScore));
+        listOfParticipants.sort(Comparator.comparingDouble(Participant::getCompositeScore).reversed());
         return  listOfParticipants;
     }
+
+    public int calculateNumberOfTeams(List<Participant> listOfParticipants,int teamSize) {
+        return (int)  Math.ceil((double)listOfParticipants.size()/teamSize);
+    }
+
 
 //3. The sorted participants  will be distributed using the snake-draft
 
     //a. initializes the required number of empty teams based on number of participants and team size
-    public List<Team> formTeams(List<Participant> listOfParticipants,  int numTeams) {
+    public List<Team> formTeams(List<Participant> listOfParticipants,  int teamSize) {
 
+        int numberOfTeams = calculateNumberOfTeams(listOfParticipants,teamSize);
+        List<Team> teams = new ArrayList<>(numberOfTeams);
         //Initialize the teams list
-        List<Team> teams = new ArrayList<>(numTeams);
-
+        Map<Integer,Integer> teamCounts = new HashMap<>();
         //initialize the empty team objects
-        for (int j = 0; j < numTeams; j++) {
-            teams.add(new Team());
+        for (int j = 0; j < numberOfTeams; j++) {
+            teams.add(new Team()); //Initialize each team
+            teamCounts.put(j,0);   //Initialize team count
         }
 
         int teamIndex = 0;
         int direction= 1;
 
         // get the current player at index i
+        //check size of team before assigning so that participants are not assigned to already filled teams
         for (Participant currentPlayer : listOfParticipants) {
+            while(teamCounts.get(teamIndex) >=  teamSize) {
+                if(direction==1) {
+                    teamIndex++;
+                    if(teamIndex == numberOfTeams) {
+                        direction = -1;
+                        teamIndex = numberOfTeams -1 ;
+                    }
+
+                }else{
+                    teamIndex--;
+                    if(teamIndex < 0) {
+                        direction = 1;
+                        teamIndex =0;
+                    }
+                }
+            }
             //b. Forward distribution round
 
             // assign the players for each team from the highest rank accordingly
             teams.get(teamIndex).addPlayers(currentPlayer);
+            teamCounts.put(teamIndex,teamCounts.get(teamIndex)+1);
 
-            if (direction == 1) {
-                teamIndex++;
-
-                //c. Turning point
-                //Once a player has been assigned to the very last team, the algo revers the direction
-                if (teamIndex == numTeams) {
-                    direction = -1;
-                    teamIndex = numTeams - 1;
-                }
-
-            }
             //d. Backwards distribution round
             //assign the players for each team moving backwards, start from the team that last assigned
 
-            else {
-                teamIndex--;
-                if (teamIndex < 0) {
-                    direction = 1;
-                    teamIndex = 0;
-                }
-            }
         }
         return teams;
 
