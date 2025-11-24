@@ -5,6 +5,7 @@ import com.gameclub.team.model.Participant;
 import com.gameclub.team.model.Role;
 import com.gameclub.team.service.FileService;
 import com.gameclub.team.service.PersonalityClassifier;
+import com.gameclub.team.service.ValidationService;
 
 import javax.lang.model.type.IntersectionType;
 import java.awt.*;
@@ -24,13 +25,53 @@ public class SurveyController {
     //GET PARTICIPANT DATA
     public Participant getParticipantData(){
 
-        //Participant main details
-        System.out.print("\nEnter Player Name: ");
-        String name = scanner.nextLine();
-        System.out.print("\nEnter Player email(eg: user1@university.edu): ");
-        String email = scanner.nextLine();
-        System.out.print("\nEnter Participant playerId(eg: P001): ");
-        String player_id = scanner.nextLine();
+        ValidationService validator = new ValidationService();
+
+        String name;
+        String email;
+        String player_id;
+
+        while(true) {
+            try {
+                //Participant main details
+                System.out.print("\nEnter Player Name: ");
+                name = scanner.nextLine();
+                validator.validate_name(name);
+                break;
+
+            } catch (IllegalArgumentException e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+        }
+
+
+        while(true) {
+            try {
+
+                System.out.print("\nEnter Player email(eg: user1@university.edu): ");
+                email = scanner.nextLine();
+                validator.validate_email(email);
+                break;
+
+            } catch (IllegalArgumentException e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+        }
+
+
+
+        while(true) {
+            try {
+
+                System.out.print("\nEnter Participant playerId(eg: P001): ");
+                player_id = scanner.nextLine();
+                validator.validate_id(player_id,false);
+                break;
+
+            } catch (IllegalArgumentException e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+        }
 
         return  new Participant(name, email, player_id);
 

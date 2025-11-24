@@ -1,7 +1,6 @@
 package com.gameclub.team.model;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 //Represents a collection of members
 public class Team {
@@ -24,118 +23,111 @@ public class Team {
         this.members = new ArrayList<>();
 
     }
+    // Constructor used for temporary 'isSwapSafe' checks
+    public Team(String Name, List<Participant> initialMembers) {
+        this.Name = Name;
+        // Defensive copy to prevent external modification
+        this.members = new ArrayList<>(initialMembers != null ? initialMembers : Collections.emptyList());
+    }
 
     public String getTeamName() {
         return Name;
     }
-    public void setTeamName(String teamName) {
-        Name = teamName;
-    }
 
-    //add participants
-    public void addPlayers(Participant p) {
-        members.add(p);
-
-    }
-    //remove player
-    public void removePlayer(Participant p) {
-        members.remove(p);
-    }
-    //get the participants
     public List<Participant> getMembers() {
         return members;
     }
 
-    //Implement the method for lowest ranked player
-    public Participant lowestRankedPlayerByGame(String game){
-        Participant lowestPlayer = null;
-        for(Participant p : members){
-            if(p.getPreferredGame().equalsIgnoreCase(game)){
-                if(lowestPlayer == null ||p.getCompositeScore() <lowestPlayer.getCompositeScore()){
-                    lowestPlayer = p;
 
-                }
-            }
+    //add participants
+    public void addPlayers(Participant p) {
+        if (p != null) {
+            this.members.add(p);
+        } else {
+            System.err.println("ERROR: Attempted to add a null participant to " + Name);
         }
-        return lowestPlayer;
+
     }
-
-    //Find the best player to be swapped
-    public Participant FindBestSwapPlayer (String violatingGame, double targetScore) {
-        // Initialize the best candidate
-        Participant bestCandidate = null;
-
-        //Initiate the minimum difference -> what do need the min difference
-        double min_diff = Double.MAX_VALUE;
-
-        // loop through the list of players who are not in failed teams
-        for(Participant player : members ){
-            //check if the player selected is not interested in the game
-            if(!player.getPreferredGame().equalsIgnoreCase(violatingGame)){
-                //calculate the absolute difference between the players score and the target
-                double currentDifference = Math.abs(player.getCompositeScore()-targetScore);
-
-                //if this player is better  match than the current best
-                if(currentDifference < min_diff){
-
-                    //update the minimum difference
-                    min_diff = currentDifference;
-
-                    //set this player as the new best candidate
-                    bestCandidate = player;
-                }
-            }
+    //remove player
+    public void removePlayer(Participant p) {
+        if (p != null) {
+            this.members.remove(p);
+        } else {
+            System.err.println("ERROR: Attempted to remove a null participant from " + Name);
         }
-        return bestCandidate;
     }
 
-    // find the lowest rank in each personality type
 
-    //Implement the method for lowest ranked player
-    public Participant personality_lowestRankedPlayer(String personality){
-        Participant lowest_personalityPlayer = null;
-        for(Participant p : members){
-            if(p.getPersonalityType().equalsIgnoreCase(personality)){
-                if(lowest_personalityPlayer == null ||p.getCompositeScore() < lowest_personalityPlayer.getCompositeScore()){
-                    lowest_personalityPlayer = p;
-                }
-
-            }
-
+    public boolean canAddPlayer(Participant player, int gameCap) {
+        if (player == null) {
+            return false;
         }
-        return lowest_personalityPlayer;
-
+        return getGameCount(player.getPreferredGame()) < gameCap;
     }
 
-
-    //get the personality count for team
-    public int getPersonalityCount(String personality){
-        int personalityCount = 0;
-
-        if(personality == null || personality.isBlank()){
-            return 0;
-        }
-        for(Participant p : members){
-            if(p.getPersonalityType().equalsIgnoreCase(personality)){
-                personalityCount++;
-
-            }
-
-        }
-        return personalityCount;
+    // (Game Variety) Helper ---
+    public int getGameCount(String game) {
+        if (game == null) return 0;
+        return (int) members.stream()
+                .filter(p -> p != null && game.equals(p.getPreferredGame()))
+                .count();
+    }
+    // Personality Mix
+    public int getPersonalityCount(String personalityType) {
+        if (personalityType == null) return 0;
+        return (int) members.stream()
+                .filter(p -> p != null && personalityType.equals(p.getPersonalityType()))
+                .count();
     }
 
-    public int getTotalSkill(){
-        return members.stream().mapToInt(Participant::getSkillLevel).sum();
+    // --- P3 (Role Diversity) Helper ---
+    public Participant lowestRankedPlayerByRole(String role) {
+        if (role == null) return null;
+        return members.stream()
+                .filter(p -> p != null && role.equals(p.getPreferredRole()))
+                .min(Comparator.comparingInt(Participant::getSkillLevel))
+                .orElse(null);
+    }
+    public Participant lowestRankedPlayerWithRedundantRole() {
+        if (members.isEmpty()) return null;
+
+        Map<String, Long> roleCounts = members.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.groupingBy(Participant::getPreferredRole, Collectors.counting()));
+
+        Set<String> redundantRoles = roleCounts.entrySet().stream()
+                .filter(entry -> entry.getValue() > 1)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+
+        if (redundantRoles.isEmpty()) return null;
+
+        return members.stream()
+                .filter(p -> p != null && redundantRoles.contains(p.getPreferredRole()))
+                .min(Comparator.comparingInt(Participant::getSkillLevel))
+                .orElse(null);
     }
 
-    public Participant getHighestHighestSkilledPlayer(){
-        return members.stream().max(Comparator.comparing(Participant::getSkillLevel)).orElse(null);
+    public int getTotalSkill() {
+        return members.stream().filter(Objects::nonNull).mapToInt(Participant::getSkillLevel).sum();
     }
 
-    public Participant  getLowestHighestSkilledPlayer (){
-        return members.stream().min(Comparator.comparing(Participant::getSkillLevel)).orElse(null);
+    // Helper to identify player to swap out in skill optimization
+    public Participant getHighestSkilledPlayer() {
+        return members.stream()
+                .filter(Objects::nonNull)
+                .max(Comparator.comparingInt(Participant::getSkillLevel))
+                .orElse(null);
     }
+
+    // Helper to identify player to swap in in skill optimization
+    public Participant getLowestSkilledPlayer() {
+        return members.stream()
+                .filter(Objects::nonNull)
+                .min(Comparator.comparingInt(Participant::getSkillLevel))
+                .orElse(null);
+    }
+
 
     //Display the formed
     public void displayTeamDetails(){
@@ -144,7 +136,7 @@ public class Team {
 
         //header per team
         System.out.printf("%-15s | %-5s | %-10s | %-10s | %-5s | %s\n ",
-                 "Name", "ID", "Game", "Role", "Skill- Level", "Personality-Type");
+                "Name", "ID", "Game", "Role", "Skill- Level", "Personality-Type");
 
         System.out.println("-----------------------------------------------------");
 

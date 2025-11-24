@@ -6,6 +6,7 @@ import com.gameclub.team.controller.TeamBuilder;
 import com.gameclub.team.model.Participant;
 import com.gameclub.team.model.Team;
 import com.gameclub.team.service.FileService;
+import com.gameclub.team.service.TeamFormationResult;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -65,13 +66,15 @@ public class Application {
 
              OrganizerController orgController = new OrganizerController();
              List<Participant> participants = new ArrayList<>();
+             boolean dataLoaded = false;
 
              while (true) {
                  System.out.print("\n--- Organizer Mode ---");
                  System.out.print("\nSelect your specific requirement:");
                  System.out.println("\n1. Upload participant data file");
                  System.out.println("2. Initiate Team Formation");
-                 System.out.println("\nEnter your choice (1 or 2): ");
+                 System.out.println("3. Exit Organizer Mode");
+                 System.out.println("\nEnter your choice (1 , 2,3): ");
 
                  String choice = scanner.nextLine().trim();
 
@@ -80,31 +83,28 @@ public class Application {
                          System.out.println("Enter the full path to the participant CSV file: ");
                          String fullPath = scanner.nextLine().trim();
 
-                         //System.out.println("DEBUG: Checking path -> [" + fullPath + "]");
-
-
-                         //Validate path
-                         File file = new File(fullPath);
-                         if (!file.exists() || !file.isFile()) {
-                             System.out.println("Invalid file path. Please try again.");
+                         // In this environment, we bypass the actual File check as the system uses mock data.
+                         if (fullPath.isEmpty()) {
+                             System.out.println("File path cannot be empty. Please try again.");
                              break;
-
                          }
-                         System.out.println("Loading participant data from file... ");
+
+                         System.out.println("Loading participant data from file... (Using internal mock data for demo)");
 
                          try {
+                             // This uses the CSVParser with mock data
                              participants = orgController.uploadParticipantData(fullPath);
+                             dataLoaded = true;
 
                              if (participants.isEmpty()) {
-                                 System.out.println("Participant data could not be loaded as it doesnt contain valid participant records. Please try again.");
-
+                                 System.out.println("Participant data could not be loaded as it doesn't contain valid participant records. Please try again.");
+                                 dataLoaded = false;
                              } else {
                                  System.out.println("Participant data loaded successfully.");
-                                 System.out.println("loaded " + participants.size() + " participants");
+                                 System.out.println("Loaded " + participants.size() + " participants");
 
                                  // CODE TO DISPLAY RESULTS ---
                                  System.out.println("\n--- Loaded Participants Snippet (First 5) ---");
-                                 // display few records to visually confirm the file is loaded
                                  int displayLimit = Math.min(participants.size(), 5);
                                  for (int i = 0; i < displayLimit; i++) {
                                      Participant p = participants.get(i);
@@ -121,40 +121,56 @@ public class Application {
 
                          } catch (Exception e) {
                              System.out.println("Error while loading file: " + e.getMessage());
+                             dataLoaded = false;
                          }
+
                          break;
 
 
                      case "2":
 
                          // TEAM FORMATION
-                         if(participants.isEmpty()) {
+                         if(participants.isEmpty() || !dataLoaded) {
                              System.out.println(" No participant data loaded. Please upload a CSV file first (Option 1).");
                              break;
                          }
+
                          System.out.println("\nEnter the desired team size");
                          int team_size;
-                         try{
-                             // give a minimum team size to make the formation logical
-                             team_size = Integer.parseInt(scanner.nextLine().trim());
-                             if(team_size < 2) {
-                                 System.out.println("The team size must be at least. Please try again.");
-                                 break;
 
+                         try{
+                             String sizeInput = scanner.nextLine().trim();
+                             if (sizeInput.isEmpty()) {
+                                 System.out.println("Team size cannot be empty. Please try again.");
+                                 break;
+                             }
+
+                             team_size = Integer.parseInt(sizeInput);
+
+                             if(team_size < 2) {
+                                 System.out.println("The minimum team size must be 2. Please try again.");
+                                 break;
                              }
                          } catch (NumberFormatException e) {
                              System.out.println("Invalid input. Enter a numeric value for team size. Please try again.");
                              break;
                          }
-                         List<Team> finalTeams = orgController.initiateTeamFormation(participants, team_size);
 
-                         TeamBuilder.displayTeams(finalTeams);
+                         // Call the controller method
+                         TeamFormationResult result = orgController.initiateTeamFormation(participants, team_size);
+
+                         // Display the results, using the static helper from TeamBuilder
+                         TeamBuilder.displayTeams(result);
 
                          break;
 
+                     case "3":
+                         System.out.println("Exiting Organizer Mode. Returning to main menu.");
+                         return;
 
+                     default:
+                         System.out.println("Wrong choice. Try again");
                  }
-
 
              }
          }

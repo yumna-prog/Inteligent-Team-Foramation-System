@@ -19,6 +19,9 @@ public class ValidationService implements ValidationServiceInt {
     public ValidationService(String file_path) {
         this.file_path = file_path;
     }
+    public ValidationService() {
+
+    }
 
     public boolean idExists(String filePath, String id) {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {

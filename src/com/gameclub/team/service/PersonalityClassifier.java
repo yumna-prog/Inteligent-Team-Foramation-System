@@ -4,10 +4,6 @@ import com.gameclub.team.model.Participant;
 
 public class PersonalityClassifier{
 
-    //Check for Leader -> 90-100
-            // Balanced -> 70-89
-            // Thinker -> 50-69
-    // else -> ????????
     public String classify(double normalizedScore) {
         if (normalizedScore >= 90) {
             return "Leader";

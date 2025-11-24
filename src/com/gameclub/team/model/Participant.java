@@ -8,7 +8,7 @@ import java.util.Objects;
 //Represents an individual member
 public class Participant {
 
-    private final String playerId;
+    private String playerId;
     private String name;
     private String email;
 
@@ -34,9 +34,6 @@ public class Participant {
         return persona_rating;
     }
 
-    public int getRaw_personalityScore() {
-        return raw_personalityScore;
-    }
     //During survey to collect participant data
     public Participant (String playerId, String name, String email){
         this.playerId = playerId;
@@ -83,15 +80,21 @@ public class Participant {
         this.raw_personalityScore = (int) Math.round(normalizedScore/100.0 * 25);
     }
 
+    public Participant(String name, String preferredRole, String personalityType, int skillLevel, String preferredGame) {
+        this.name = name;
+        this.preferredRole = preferredRole;
+        this.personalityType = personalityType;
+        this.skillLevel = skillLevel;
+        this.preferredGame = preferredGame;
+    }
+
+
 
     public String getName() {
         return name;
     }
     public String getEmail() {
         return email;
-    }
-    public void setEmailMail(String emailMail) {
-        this.email = emailMail;
     }
 
     public String getPlayerId() {
@@ -115,28 +118,10 @@ public class Participant {
     }
 
     public int getSkillLevel() {
-        return skillLevel;
+        return Math.max(0,skillLevel);
     }
 
-    public void setPreferredGame(String preferredGame) {
-        this.preferredGame = preferredGame;
-    }
 
-    public void setPreferredRole(String preferredRole) {
-        this.preferredRole = preferredRole;
-    }
-
-    public void setPersonalityScore(int personalityScore) {
-        this.raw_personalityScore = personalityScore;
-    }
-
-    public void setPersonalityType(String personalityType) {
-        this.personalityType = personalityType;
-    }
-
-    public void setSkillLevel(int SkillLevel) {
-        skillLevel = SkillLevel;
-    }
 
     public double getNormalizedScore() {
         return this.normalizedScore;
@@ -168,6 +153,9 @@ public class Participant {
         Participant p = (Participant) o;
         return this.playerId.equals(p.playerId);
     }
+
+
+
     @Override
     public int hashCode() {
         return Objects.hash(playerId);
@@ -196,11 +184,5 @@ public class Participant {
     }
 
 
-
-
-
-
-
-
-    }
+}
 
