@@ -40,11 +40,6 @@ public class TeamBuilder{
         return listOfParticipants;
     }
 
-    public int calculateNumberOfTeams(List<Participant> listOfParticipants,int teamSize) {
-        if (teamSize <= 0) return 0;
-        return (int)  Math.ceil((double)listOfParticipants.size()/teamSize);
-    }
-
 
 
     public TeamFormationResult formTeams(List<Participant> listOfParticipants, int teamSize, int game_cap) {
@@ -471,100 +466,6 @@ public class TeamBuilder{
         return unresolvableIssues;
     }
 
-    // ====================================================================================
-    // CRITICAL: Optimization Loop (P1 -> P4)
-    // ====================================================================================
-    public List<Team> optimizeTeams(List<Team> teams, int gameCap, double skillThreshold) {
-
-        final int MAX_ITERATIONS = 10;
-        int currentIteration = 0;
-        boolean constraintsBroken = true;
-
-        List<Map<String, Object>> finalUnresolvableIssues = new ArrayList<>();
-
-        while (currentIteration < MAX_ITERATIONS) {
-            constraintsBroken = false;
-            currentIteration++;
-            System.out.println("\n--- Optimization Iteration " + currentIteration + " ---");
-            int initialIssuesCount = finalUnresolvableIssues.size();
-
-            // P1: Game Variety Check/Fix
-            List<Map<String, Object>> p1Failures = checkGameVariety(teams, gameCap);
-            if (!p1Failures.isEmpty()) {
-                System.out.println("P1 (Game Variety) failed on " + p1Failures.size() + " teams. Attempting fix...");
-                finalUnresolvableIssues.addAll(fixGameVariety(teams, gameCap));
-                constraintsBroken = true;
-            }
-
-            // P2: Personality Mix Check/Fix
-            List<Map<String, Object>> p2Failures = checkPersonalityMix(teams);
-            if (!p2Failures.isEmpty()) {
-                System.out.println("P2 (Personality Mix) failed on " + p2Failures.size() + " teams. Attempting fix...");
-                finalUnresolvableIssues.addAll(fixPersonalityFailure(p2Failures, teams, gameCap));
-                constraintsBroken = true;
-            }
-
-            // P3: Role Diversity Check/Fix
-            List<Map<String, Object>> p3Failures = checkRoleDiversity(teams);
-            if (!p3Failures.isEmpty()) {
-                System.out.println("P3 (Role Diversity) failed on " + p3Failures.size() + " teams. Attempting fix...");
-                finalUnresolvableIssues.addAll(fixRoleDiversity(teams, gameCap));
-                constraintsBroken = true;
-            }
-
-            // P4: Skill Balance Check/Fix
-            List<Map<String, Object>> p4Failures = checkSkillBalance(teams, skillThreshold);
-            if (!p4Failures.isEmpty()) {
-                System.out.println("P4 (Skill Balance) failed on " + p4Failures.size() + " teams. Attempting fix...");
-                finalUnresolvableIssues.addAll(fixSkillBalance(teams, skillThreshold, gameCap));
-                constraintsBroken = true;
-            }
-
-            // Check if any new unresolvable issues were generated this iteration
-            if (finalUnresolvableIssues.size() == initialIssuesCount && !constraintsBroken) {
-                System.out.println("\n--- All Constraints Met. Optimization Complete. ---");
-                break;
-            }
-        }
-
-        if (currentIteration >= MAX_ITERATIONS) {
-            System.err.println("WARNING: Optimization loop terminated after " + MAX_ITERATIONS + " iterations without convergence.");
-        }
-
-        // --- FINAL FAILURE REPORT ---
-        System.out.println("\n================================================");
-        System.out.println("      FINAL CONSTRAINT FAILURE REPORT");
-        System.out.println("================================================");
-        if (finalUnresolvableIssues.isEmpty()) {
-            System.out.println("SUCCESS: No unresolvable issues were logged during optimization.");
-        } else {
-            System.out.println("ATTENTION: " + finalUnresolvableIssues.size() + " issues remain that could not be resolved by automated swaps:");
-            finalUnresolvableIssues.forEach(issue ->
-                    System.out.println(" - " + issue.get("Reason") + " | Participant: " + issue.get("Name") + " | Team: " + issue.get("TeamOrigin")));
-        }
-        System.out.println("================================================");
-        // --- END REPORT ---
-
-        return teams;
-    }
-
-    public static  void displayTeams(List<Team> teams) {
-        if (teams == null || teams.isEmpty()){
-            System.out.println("No teams were formed or teams list is empty.");
-            return;
-        }
-        System.out.println("\\n==========================================");
-        System.out.println(" FINAL TEAMS LIST");
-        System.out.println("\\n==========================================");
-
-
-        for (Team currentTeam : teams) {
-            currentTeam.displayTeamDetails();
-
-        }
-        System.out.println("Team formation process completed.");
-
-    }
 
 
 }

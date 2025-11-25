@@ -1,0 +1,3 @@
+ID,Name,Email,PreferredGame,SkillLevel,PreferredRole,PersonalityScore,PersonalityType
+humai,humai@university.edu,P004,FIFA,5,Supporter,56.00,Thinker
+P002,yumi,yumi@university.edu,Basketball,7,Defender,60.00,Thinker

@@ -1,6 +1,7 @@
 package com.gameclub.team.service;
 
 import com.gameclub.team.model.Participant;
+import com.gameclub.team.model.Team;
 
 import javax.sound.midi.InvalidMidiDataException;
 import java.io.*;
@@ -134,7 +135,146 @@ public class FileService implements FileServiceInt {
         return participants;
     }
 
-    //SAVE THE FORMED TEAMS
+    //==================================SAVE THE FORMED TEAMS==================================//
+    //Save the formed teams and the unassigned participants to a csv file
+
+    public void saveFormedTeams(TeamFormationResult result, String fillPath) throws IOException {
+
+        try(BufferedWriter writer =  new BufferedWriter(new FileWriter(file_path))){
+
+            writer.write("==========================================================");
+            writer.newLine();
+            writer.write("           TEAM FORMATION REPORT - RESULTS");
+            writer.newLine();
+            writer.write("==========================================================");
+            writer.newLine();
+            writer.newLine();
+
+            writer.write("--- FORMED TEAMS ---");
+            writer.newLine();
+
+            if(result.teams.isEmpty()) {
+                writer.write("No teams were successfully formed.");
+                writer.newLine();
+            }
+            else{
+                for(Team team : result.teams){
+
+                    double avgSkill = (team.getMembers().isEmpty()) ? 0 : team.getTotalSkill() / (double) team.getMembers().size();
+
+                    writer.write("----------------------------------------------------------");
+                    writer.newLine();
+                    writer.write(String.format("TEAM: %s (Members: %d, Avg Skill: %.2f)",
+                            team.getTeamName(), team.getMembers().size(), avgSkill));
+                    writer.newLine();
+                    writer.write("----------------------------------------------------------");
+                    writer.newLine();
+
+                    // Header for the member table
+                    writer.write(String.format("%-15s | %-10s | %-12s | %-5s | %s",
+                            "NAME", "ROLE", "PERSONA", "SKILL", "GAME"));
+                    writer.newLine();
+                    writer.write("----------------------------------------------------------");
+                    writer.newLine();
+
+                    //Write the member details
+                    for(Participant p : team.getMembers()){
+                        writer.write(String.format("%-15s | %-10s | %-12s | %-5d | %s",
+                                p.getName(),
+                                p.getPreferredRole(),
+                                p.getPersonalityType(),
+                                p.getSkillLevel(),
+                                p.getPreferredGame()));
+
+
+                        writer.newLine();
+                    }
+                    writer.newLine();
+                }
+            }
+
+            writer.newLine();
+            writer.write("==========================================================");
+            writer.newLine();
+
+            // --- 2. Write Unassigned Participants ---
+            writer.write("--- UNASSIGNED PARTICIPANTS ---");
+            writer.newLine();
+
+            if (result.unassignedParticipants.isEmpty()) {
+                writer.write("All participants were successfully assigned to a team.");
+                writer.newLine();
+
+            }else{
+                writer.write("The following" + result.unassignedParticipants.size() +" participants could not be assigned due to constraints (Game Cap / Leader Limit / Capacity):");
+                writer.newLine();
+
+                // Header for the unassigned participant table
+                writer.write(String.format("%-15s | %-10s | %-12s | %-5s | %s",
+                        "NAME", "ROLE", "PERSONA", "SKILL", "GAME"));
+
+                writer.newLine();
+                writer.write("-----------------------------------------------------");
+                writer.newLine();
+
+                for(Participant p : result.unassignedParticipants){
+                    writer.write(String.format("%-15s | %-10s | %-12s | %-5d | %s",
+                            p.getName(),
+                            p.getPreferredRole(),
+                            p.getPersonalityType(),
+                            p.getSkillLevel(),
+                            p.getPreferredGame()));
+
+
+                    writer.newLine();
+                }
+            }
+            writer.write("==========================================================");
+            writer.newLine();
+
+        }catch(IOException e){
+            System.out.println("Error saving the formed teams to a file: "+"Cause: " + e.getMessage());
+            throw e;
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 

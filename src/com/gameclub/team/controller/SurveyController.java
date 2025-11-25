@@ -73,7 +73,7 @@ public class SurveyController {
             }
         }
 
-        return  new Participant(name, email, player_id);
+        return  new Participant(player_id,name,email);
 
     }
 
