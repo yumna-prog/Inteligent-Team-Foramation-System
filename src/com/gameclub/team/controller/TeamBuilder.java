@@ -366,7 +366,7 @@ public class TeamBuilder{
 
     public void optimizeTeamsConcurrent(List<Team> teams) {
 
-        // --- 1. ExecutorService Setup ---
+        // --- 1. ExecutorServ2ice Setup ---
         int poolSize = Runtime.getRuntime().availableProcessors();
         ExecutorService executor = Executors.newFixedThreadPool(poolSize);
 

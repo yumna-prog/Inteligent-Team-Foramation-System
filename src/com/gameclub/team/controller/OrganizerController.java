@@ -2,6 +2,7 @@ package com.gameclub.team.controller;
 
 import com.gameclub.team.model.Participant;
 
+import com.gameclub.team.service.ConstraintChecker;
 import com.gameclub.team.service.FileService;
 import com.gameclub.team.service.TeamFormationResult;
 
@@ -13,16 +14,15 @@ public class OrganizerController {
     //Requirement to upload file data
     private String filePath;
 
-    private TeamBuilder teamBuilder;
+    public final TeamBuilder teamBuilder;
 
-    public OrganizerController(TeamBuilder teamBuilder) {
-        this.teamBuilder = teamBuilder;
-    }
     public OrganizerController() {
         this.teamBuilder = new TeamBuilder();
     }
 
-
+    public OrganizerController(TeamBuilder teamBuilder) {
+        this.teamBuilder = teamBuilder;
+    }
     public List<Participant> uploadParticipantData(String file_path) {
 
         this.filePath = file_path;
@@ -39,6 +39,17 @@ public class OrganizerController {
         try {
             // Define the required constraints
             final int game_cap = 2; // Max 2 from same game per team (P1)
+        //==================================================================================//
+            //Set up ConstraintChecker for Optimization
+            double globalSkillAvg = participants.stream()
+                    .mapToInt(Participant::getSkillLevel)
+                    .average().orElse(5.0);
+
+            ConstraintChecker checker = new ConstraintChecker(globalSkillAvg);
+
+            //Passing the checker instance to the TeamBuilder for the optimizer
+            teamBuilder.setConstraintChecker(checker);
+        //===============================================================================//
 
             // Step 1: Sort
             List<Participant> sortedParticipants = teamBuilder.sortParticipants(participants);
@@ -50,8 +61,9 @@ public class OrganizerController {
 
             // Step 3:  Concurrent applied for optimization
             System.out.println("\n--- Starting Iterative Team Optimization ---");
-            System.out.println("LOG: Optimization phase executed successfully (Focusing on P1/P3/P4 fixes).");
 
+            teamBuilder.optimizeTeamsConcurrent(result.getTeams());
+            System.out.println("LOG: Optimization phase executed successfully using concurrency.");
 
             final String output_filePath = "team formation results.csv";
 
@@ -59,6 +71,7 @@ public class OrganizerController {
             FileService fileService = new FileService();
             try{
                 System.out.println("Saving the formed teams to file.........");
+                //The result object contains the reference to the optimized tems
                 fileService.saveFormedTeams(result,output_filePath);
                 System.out.println("\nTeam successfully saved ");
             }

@@ -14,6 +14,11 @@ public class TeamFormationResult {
     public final List<Team> teams;
     public final List<Participant> unassignedParticipants;
 
+
+    public List<Team> getTeams() {
+        return teams;
+    }
+
     public TeamFormationResult(List<Team> teams, List<Participant> unassignedParticipants) {
         this.teams = teams;
         this.unassignedParticipants = unassignedParticipants;
