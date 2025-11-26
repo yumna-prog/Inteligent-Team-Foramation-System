@@ -128,7 +128,6 @@ public class SurveyController {
         InterestGame selectedGame = gamesOptions[gameInterestIndex-1];
         String game_option = selectedGame.toString();
 
-
         //Preferred role
         Role[] role_options = Role.values();
         System.out.println("\nSelect your preferred role (1-5):");
@@ -137,8 +136,7 @@ public class SurveyController {
         }
         int roleIndex = SurveyController.promptForSelection("",1,role_options.length);
         Role selectedRole = role_options[roleIndex-1];
-        // in the survey
-        String role_option = selectedRole.toString();
+
         // in the file
         String role_option_csv = selectedRole.getRole();
 

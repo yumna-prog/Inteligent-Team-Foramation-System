@@ -56,7 +56,7 @@ public class TeamBuilder{
     public List<Participant> sortParticipants(List<Participant> listOfParticipants) {  /* 2.1 - seq*/
         if (listOfParticipants == null || listOfParticipants.isEmpty()) return Collections.emptyList();
         listOfParticipants.sort(Comparator.comparingDouble(Participant::getCompositeScore).reversed());
-        return listOfParticipants;  // 1.1.1 - seq
+        return listOfParticipants;  // 2.2 - seq
     }
 
 
@@ -216,7 +216,7 @@ public class TeamBuilder{
 
     //Iteratively optimizes the teams using concurrent processing to find the best swap in each round quickly.
 
-    public void optimizeTeamsConcurrent(List<Team> teams) {
+    public void optimizeTeamsConcurrent(List<Team> teams) { /*2.4 seq*/
 
         // --- 1. ExecutorServ2ice Setup ---
         int poolSize = Runtime.getRuntime().availableProcessors();
@@ -280,7 +280,7 @@ public class TeamBuilder{
             // --- 4. Apply the Best Change Sequentially (State Update) ---
             if (improvementFound && bestSwap != null && bestSwap.improvementScore > 0.0) {
 
-                Team teamA = findTeamByName(teams, bestSwap.teamAName);
+                Team teamA = findTeamByName(teams, bestSwap.teamAName); /*2.4.3*/
                 Team teamB = findTeamByName(teams, bestSwap.teamBName);
 
                 Participant playerX = teamA.getMemberByName(bestSwap.participantXName);

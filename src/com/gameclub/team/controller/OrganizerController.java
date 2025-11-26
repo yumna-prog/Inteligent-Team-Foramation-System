@@ -24,7 +24,6 @@ public class OrganizerController {
         this.teamBuilder = teamBuilder;
     }
     public List<Participant> uploadParticipantData(String file_path) {
-
         this.filePath = file_path;
         FileService fileService = new FileService(file_path);
         return fileService.loadParticipants();
@@ -45,19 +44,19 @@ public class OrganizerController {
             System.out.println("LOG: Participants Sorted by Composite Score.");
 
             // Step 2: Form Teams (Drafting with initial constraints)
-            TeamFormationResult result = teamBuilder.formTeams(sortedParticipants, teamSize, game_cap); /* 2.4 - seq*/
+            TeamFormationResult result = teamBuilder.formTeams(sortedParticipants, teamSize, game_cap); /* 2.3 - seq*/
             System.out.println("LOG: Initial Teams Formed (Max 1 Leader Constraint applied).");
 
             //==================================================================================//
             //Set up ConstraintChecker for Optimization
             double globalSkillAvg = participants.stream()
-                    .mapToInt(Participant::getSkillLevel)
+                    .mapToInt(Participant::getSkillLevel) /*3 seq*/
                     .average().orElse(5.0);
 
-            ConstraintChecker checker = new ConstraintChecker(globalSkillAvg);
+            ConstraintChecker checker = new ConstraintChecker(globalSkillAvg); /*4 seq*/
 
             //Passing the checker instance to the TeamBuilder for the optimizer
-            teamBuilder.setConstraintChecker(checker);
+            teamBuilder.setConstraintChecker(checker); /*5 seq*/
             //===============================================================================//
 
 
@@ -65,17 +64,17 @@ public class OrganizerController {
             // Step 3:  Concurrent applied for optimization
             System.out.println("\n--- Starting Iterative Team Optimization ---");
 
-            teamBuilder.optimizeTeamsConcurrent(result.getTeams());
+            teamBuilder.optimizeTeamsConcurrent(result.getTeams()); /*2.4 seq*/
             System.out.println("LOG: Optimization phase executed successfully using concurrency.");
 
             final String output_filePath = "team formation results.csv";
 
             //Auto save the teams formed
-            FileService fileService = new FileService();
+            FileService fileService = new FileService(); /*2.5*/
             try{
                 System.out.println("Saving the formed teams to file.........");
                 //The result object contains the reference to the optimized tems
-                fileService.saveFormedTeams(result,output_filePath);
+                fileService.saveFormedTeams(result,output_filePath);   /*9*/
                 System.out.println("\nTeam successfully saved ");
             }
             catch(IOException e){

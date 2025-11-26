@@ -64,7 +64,7 @@ public class Application {
          //Organizer workflow
          public static void organizerFlow(Scanner scanner) {
 
-             OrganizerController orgController = new OrganizerController();
+             OrganizerController orgController = new OrganizerController(); /*1 seq*/
              List<Participant> participants = new ArrayList<>();
              boolean dataLoaded = false;
 
@@ -157,7 +157,7 @@ public class Application {
                          }
 
                          // Call the controller method
-                         TeamFormationResult result = orgController.initiateTeamFormation(participants, team_size);
+                         TeamFormationResult result = orgController.initiateTeamFormation(participants, team_size); /*2 seq*/
 
                          // Display the results, using the static helper from TeamBuilder
                          TeamBuilder.displayTeams(result);
