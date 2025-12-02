@@ -222,9 +222,10 @@ public class TeamBuilder{
 
         boolean improvementFound = true;
         int round = 1;
+        int maxRounds = 200;
 
         // Continue looping as long as we find a beneficial swap
-        while (improvementFound) {
+        while (improvementFound && round <= maxRounds) {
             improvementFound = false;
             BestSwapInfo bestSwap = null;
 

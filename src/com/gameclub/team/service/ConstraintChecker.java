@@ -28,9 +28,11 @@ public class ConstraintChecker {
         this.targetGlobalAverageSkill = globalAvgSkill;
     }
 
+
     public double getTargetGlobalAverageSkill() {
         return targetGlobalAverageSkill;
     }
+
 
     //The main method called by the SwapEvaluationTask to get a composite penalty score.
     public double evaluateTeamPenalty(Team team) {
