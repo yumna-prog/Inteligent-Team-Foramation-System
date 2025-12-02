@@ -21,9 +21,8 @@ public class ValidationService{
     public ValidationService(String file_path) {
         this.filePath = file_path;
     }
-    public ValidationService() {
 
-    }
+    //Design pattern applied- Singleton
     public static ValidationService getInstance(String filePath) {
         if (instance == null) {
             instance = new ValidationService(filePath);

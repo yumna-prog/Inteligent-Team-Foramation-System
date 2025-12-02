@@ -6,3 +6,4 @@ P001,Humaira,humaira@university.edu,Valorant,7,Defender,60.00,Thinker
 P008,Samy,samy@university.edu,Dota2,4,Coordinator,60.00,Thinker
 P001,Humaira,humaira@university.edu,Valorant,7,Defender,60.00,Thinker
 P001,Humaira,humaira@university.edu,Valorant,7,Defender,60.00,Thinker
+P001,Humaira,humaira@university.edu,Valorant,7,Defender,60.00,Thinker

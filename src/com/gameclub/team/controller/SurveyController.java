@@ -38,7 +38,9 @@ public class SurveyController {
     //GET PARTICIPANT DATA
     public Participant getParticipantData(){
 
-        ValidationService validator = new ValidationService();
+         //===============================================================//
+        //Singleton applied//
+        ValidationService validator = ValidationService.getInstance(file_path);
 
         String name;
         String email;
