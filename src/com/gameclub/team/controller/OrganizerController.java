@@ -13,19 +13,24 @@ import java.util.List;
 public class OrganizerController {
     //Requirement to upload file data
     private String filePath;
-
     public final TeamBuilder teamBuilder;
+    private final FileService fileService; // interface usage
 
     public OrganizerController() {
         this.teamBuilder = new TeamBuilder();
+        this.fileService = new FileService("participants.csv");
     }
 
-    public OrganizerController(TeamBuilder teamBuilder) {
+    public OrganizerController(FileService fileService, TeamBuilder teamBuilder) {
         this.teamBuilder = teamBuilder;
+        this.fileService = fileService;
     }
+
+
+
+
     public List<Participant> uploadParticipantData(String file_path) {
         this.filePath = file_path;
-        FileService fileService = new FileService(file_path);
         return fileService.loadParticipants();
     }
 
@@ -90,7 +95,12 @@ public class OrganizerController {
     }
 
 
+    public String getFilePath() {
+        return filePath;
+    }
 
-
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
 }
 

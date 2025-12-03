@@ -7,10 +7,9 @@ import com.gameclub.team.service.TeamFormationResult;
 import com.gameclub.team.thread.BestSwapInfo;
 import com.gameclub.team.thread.SwapEvaluationTask;
 
-import java.sql.ClientInfoStatus;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.stream.Collectors;
+
 
 //==================================================================================//
 //Calculates the required numberOfTeams
@@ -46,10 +45,6 @@ public class TeamBuilder{
         this.constraintChecker = constraintChecker;
     }
 
-    public ConstraintChecker getConstraintChecker() {
-        return constraintChecker;
-    }
-
     //2. The participants will be sorted based on the composite score
     public List<Participant> sortParticipants(List<Participant> listOfParticipants) {  /* 2.1 - seq*/
         if (listOfParticipants == null || listOfParticipants.isEmpty()) return Collections.emptyList();
@@ -63,93 +58,105 @@ public class TeamBuilder{
         List<Team> teams = new ArrayList<>();
         List<Participant> unassignedParticipants = new ArrayList<>();
 
-        if (listOfParticipants == null || listOfParticipants.isEmpty() || teamSize <= 0) return new TeamFormationResult(teams, listOfParticipants); /*2.3.1 - seq */
+        try {
+            if (listOfParticipants == null || listOfParticipants.isEmpty() || teamSize <= 0)
+                return new TeamFormationResult(teams, listOfParticipants); /*2.3.1 - seq */
 
-        int numberOfTeams = (int) Math.ceil((double) listOfParticipants.size() / teamSize);
-        for (int j = 0; j < numberOfTeams; j++) {
-            teams.add(new Team("Team" + (j + 1)));
-        }
-
-        // Hard Constraint: Max 1 Leader Allocation
-        List<Participant> allLeaders = listOfParticipants.stream()
-                .filter(p -> "Leader".equals(p.getPersonalityType())) /* 2.3.3 - seq*/
-                .sorted(Comparator.comparingDouble(Participant::getCompositeScore).reversed()) /* 2.3.4 - seq*/
-                .toList();
-
-        List<Participant> nonLeaders = listOfParticipants.stream()
-                .filter(p -> !"Leader".equals(p.getPersonalityType())) /* 2.3.5 - seq*/
-                .toList();
-
-        // Assign exactly one leader per team (if available)
-        List<Participant> assignedLeaders = new ArrayList<>();
-        for (int i = 0; i < numberOfTeams; i++) {
-            if (i < allLeaders.size()) {
-                teams.get(i).addPlayers(allLeaders.get(i));  /*2.3.6 - seq */
-                assignedLeaders.add(allLeaders.get(i));
+            int numberOfTeams = (int) Math.ceil((double) listOfParticipants.size() / teamSize);
+            for (int j = 0; j < numberOfTeams; j++) {
+                teams.add(new Team("Team" + (j + 1)));
             }
-        }
 
-        // --- Prepare remaining players pool ---
-        // 1. All Non-Leaders
-        List<Participant> remainingPlayers = new ArrayList<>(nonLeaders);
-        // 2. All Leaders who were NOT assigned (Excess Leaders)
-        List<Participant> excessLeaders = allLeaders.stream()
-                .filter(p -> !assignedLeaders.contains(p))
-                .toList();
+            // Hard Constraint: Max 1 Leader Allocation
+            List<Participant> allLeaders = listOfParticipants.stream()
+                    .filter(p -> "Leader".equals(p.getPersonalityType())) /* 2.3.3 - seq*/
+                    .sorted(Comparator.comparingDouble(Participant::getCompositeScore).reversed()) /* 2.3.4 - seq*/
+                    .toList();
 
-        System.out.println("LOG: Found " + assignedLeaders.size() + " initial leaders assigned. " + excessLeaders.size() + " excess leaders unassigned.");
+            List<Participant> nonLeaders = listOfParticipants.stream()
+                    .filter(p -> !"Leader".equals(p.getPersonalityType())) /* 2.3.5 - seq*/
+                    .toList();
 
-        remainingPlayers.addAll(excessLeaders);
-        remainingPlayers.sort(Comparator.comparingDouble(Participant::getCompositeScore).reversed()); /* 2.3.7 - seq*/
+            // Assign exactly one leader per team (if available)
+            List<Participant> assignedLeaders = new ArrayList<>();
+            try {
 
-        // Use an index-based loop for easier manipulation of the remainingPlayers list
-        for (int pIndex = 0; pIndex < remainingPlayers.size(); ) {
-            Participant currentPlayer = remainingPlayers.get(pIndex);
-            Team bestFitTeam = null;
-            int lowestUniqueRoleCount = Integer.MAX_VALUE; // Start high to find the team needing diversity the most
-
-            // Shuffle teams to introduce fairness if multiple teams have the same lowest role count (P5/Randomization)
-            Collections.shuffle(teams);
-
-            for (Team currentTeam : teams) {
-                // 1. Hard Check: Team Capacity (P5)
-                if (currentTeam.getMembers().size() >= teamSize) {
-                    continue;
-                }
-
-                // 2. Hard Check: P1/P3 Constraints
-                boolean isLeader = "Leader".equals(currentPlayer.getPersonalityType()); /* 2.3.8 - seq*/
-                // NOTE: Assuming Participant has getPreferredGame() method
-                boolean gameCapMet = currentTeam.getGameCount(currentPlayer.getPreferredGame()) < game_cap; /* 2.3.9 - seq*/
-                boolean leaderConstraintMet = !isLeader || currentTeam.getPersonalityCount("Leader") < 1;  /* 2.3.10 - seq*/
-
-                if (gameCapMet && leaderConstraintMet) {
-
-                    // 3. P2 Preference Check: Find team that currently has the fewest unique roles
-                    // (This maximizes the chance of adding a new role or balancing role distribution)
-                    int currentUniqueRoles = currentTeam.getUniqueRoleCount();   /*2.3.11 - seq */
-
-                    if (currentUniqueRoles < lowestUniqueRoleCount) {
-                        lowestUniqueRoleCount = currentUniqueRoles;
-                        bestFitTeam = currentTeam;
+                for (int i = 0; i < numberOfTeams; i++) {
+                    if (i < allLeaders.size()) {
+                        teams.get(i).addPlayers(allLeaders.get(i));  /*2.3.6 - seq */
+                        assignedLeaders.add(allLeaders.get(i));
                     }
                 }
+            } catch (Exception e) {
+                System.err.println("Failed to assign leaders. Cause :" + e.getMessage());
             }
 
-            // --- Assignment Decision ---
-            if (bestFitTeam != null) {
-                // Assign player and remove from the list
-                bestFitTeam.addPlayers(currentPlayer);  /* 2.3.12 - seq*/
-                remainingPlayers.remove(pIndex); // Use remove(index) to shift subsequent elements
-            } else {
-                // If no team could accept this player, move to the next player
-                // (The player remains in remainingPlayers to be unassigned)
-                pIndex++;
+            // --- Prepare remaining players pool ---
+            // 1. All Non-Leaders
+            List<Participant> remainingPlayers = new ArrayList<>(nonLeaders);
+            // 2. All Leaders who were NOT assigned (Excess Leaders)
+            List<Participant> excessLeaders = allLeaders.stream()
+                    .filter(p -> !assignedLeaders.contains(p))
+                    .toList();
+
+            System.out.println("LOG: Found " + assignedLeaders.size() + " initial leaders assigned. " + excessLeaders.size() + " excess leaders unassigned.");
+
+            remainingPlayers.addAll(excessLeaders);
+            remainingPlayers.sort(Comparator.comparingDouble(Participant::getCompositeScore).reversed()); /* 2.3.7 - seq*/
+
+            // Use an index-based loop for easier manipulation of the remainingPlayers list
+            for (int pIndex = 0; pIndex < remainingPlayers.size(); ) {
+                try {
+                    Participant currentPlayer = remainingPlayers.get(pIndex);
+                    Team bestFitTeam = null;
+                    int lowestUniqueRoleCount = Integer.MAX_VALUE; // Start high to find the team needing diversity the most
+
+                    // Shuffle teams to introduce fairness if multiple teams have the same lowest role count (P5/Randomization)
+                    Collections.shuffle(teams);
+
+                    for (Team currentTeam : teams) {
+                        // 1. Hard Check: Team Capacity (P5)
+                        if (currentTeam.getMembers().size() >= teamSize) {
+                            continue;
+                        }
+
+                        // 2. Hard Check: P1/P3 Constraints
+                        boolean isLeader = "Leader".equals(currentPlayer.getPersonalityType()); /* 2.3.8 - seq*/
+                        // NOTE: Assuming Participant has getPreferredGame() method
+                        boolean gameCapMet = currentTeam.getGameCount(currentPlayer.getPreferredGame()) < game_cap; /* 2.3.9 - seq*/
+                        boolean leaderConstraintMet = !isLeader || currentTeam.getPersonalityCount("Leader") < 1;  /* 2.3.10 - seq*/
+
+                        if (gameCapMet && leaderConstraintMet) {
+
+                            // 3. P2 Preference Check: Find team that currently has the fewest unique roles
+                            // (This maximizes the chance of adding a new role or balancing role distribution)
+                            int currentUniqueRoles = currentTeam.getUniqueRoleCount();   /*2.3.11 - seq */
+
+                            if (currentUniqueRoles < lowestUniqueRoleCount) {
+                                lowestUniqueRoleCount = currentUniqueRoles;
+                                bestFitTeam = currentTeam;
+                            }
+                        }
+                    }
+
+                    // --- Assignment Decision ---
+                    if (bestFitTeam != null) {
+                        // Assign player and remove from the list
+                        bestFitTeam.addPlayers(currentPlayer);  /* 2.3.12 - seq*/
+                        remainingPlayers.remove(pIndex); // Use remove(index) to shift subsequent elements
+                    }
+                }catch (Exception e) {
+                    System.err.println("Failed to assign leaders. Cause :" + e.getMessage());
+                    pIndex++;
+
+                }
+
+                // Any players left in remainingPlayers could not be assigned due to constraints or capacity.
+                unassignedParticipants.addAll(remainingPlayers);
             }
+        } catch (Exception e) {
+            System.err.println("Error: Unexpected issue in formTeams. Cause :" + e.getMessage());
         }
-
-        // Any players left in remainingPlayers could not be assigned due to constraints or capacity.
-        unassignedParticipants.addAll(remainingPlayers);
 
         return new TeamFormationResult(teams, unassignedParticipants); /* 2.3.13 - seq*/
     }
@@ -173,16 +180,16 @@ public class TeamBuilder{
             System.out.println("\n--- " + team.getTeamName() + " (Members: " + team.getMembers().size() + ", Avg Skill: " + String.format("%.2f", avgSkill) + ") ---");
 
             // Use standard output formatting for the table
-            System.out.println(String.format("%-10s | %-10s | %-10s | %-5s | %s",
-                    "NAME", "ROLE", "PERSONA", "SKILL", "GAME"));
+            System.out.printf("%-10s | %-10s | %-10s | %-5s | %s%n",
+                    "NAME", "ROLE", "PERSONA", "SKILL", "GAME");
             System.out.println("-----------|------------|------------|-------|----------------");
 
-            team.getMembers().forEach(p -> System.out.println(String.format("%-10s | %-10s | %-10s | %-5d | %s",
+            team.getMembers().forEach(p -> System.out.printf("%-10s | %-10s | %-10s | %-5d | %s%n",
                     p.getName(),
                     p.getPreferredRole(),
                     p.getPersonalityType(),
                     p.getSkillLevel(),
-                    p.getPreferredGame())));
+                    p.getPreferredGame()));
         }
 
         // Print Unassigned Leaders as requested
@@ -210,6 +217,19 @@ public class TeamBuilder{
         System.out.println("================================================");
     }
 
+    public static void displayOnlyTeams(TeamFormationResult result) {
+        if (result == null || result.getTeams().isEmpty()) {
+            System.out.println("❌ No teams were formed.");
+            return;
+        }
+
+        for (Team team : result.getTeams()) {
+            System.out.println("\n" + team.getTeamName() + ":");
+            for (Participant p : team.getMembers()) {
+                System.out.println("  - " + p.getName() + " (" + p.getPersonalityType() + ")");
+            }
+        }
+    }
 
 
     //Iteratively optimizes the teams using concurrent processing to find the best swap in each round quickly.
@@ -219,6 +239,7 @@ public class TeamBuilder{
         // --- 1. ExecutorServ2ice Setup ---
         int poolSize = Runtime.getRuntime().availableProcessors();
         ExecutorService executor = Executors.newFixedThreadPool(poolSize);
+
 
         System.out.printf("LOG: Initializing Optimization Thread Pool with %d workers.\n", poolSize);
 
@@ -263,21 +284,29 @@ public class TeamBuilder{
 
                 // Sequentially analyze the results from the Futures
                 for (Future<BestSwapInfo> future : futures) {
-                    BestSwapInfo info = future.get();
+                    try {
+                        BestSwapInfo info = future.get();
 
-                    if (info.improvementScore > maxImprovement) {
-                        maxImprovement = info.improvementScore;
-                        bestSwap = info;
-                        improvementFound = true;
+                        if (info.improvementScore > maxImprovement) {
+                            maxImprovement = info.improvementScore;
+                            bestSwap = info;
+                            improvementFound = true;
+                        }
+                    } catch (ExecutionException e) {
+                        System.out.println("Swap Evaluation failed");
+
+
                     }
                 }
-            } catch (InterruptedException | ExecutionException e) {
+
+            } catch (InterruptedException e) {
                 System.err.println("ERROR: Interruption or execution issue during concurrent swap: " + e.getMessage());
                 Thread.currentThread().interrupt();
+                break;
             }
 
             // --- 4. Apply the Best Change Sequentially (State Update) ---
-            if (improvementFound && bestSwap != null && bestSwap.improvementScore > 0.0) {
+            if (improvementFound && bestSwap.improvementScore > 0.0) {
 
                 Team teamA = findTeamByName(teams, bestSwap.teamAName); /*2.4.3*/
                 Team teamB = findTeamByName(teams, bestSwap.teamBName);
@@ -285,17 +314,22 @@ public class TeamBuilder{
                 Participant playerX = teamA.getMemberByName(bestSwap.participantXName);
                 Participant playerY = teamB.getMemberByName(bestSwap.participantYName);
 
-                if (teamA != null && teamB != null && playerX != null && playerY != null) {
-                    // Critical: This modification MUST be sequential in the main thread.
-                    teamA.getMembers().remove(playerX);
-                    teamB.getMembers().remove(playerY);
-                    teamA.getMembers().add(playerY);
-                    teamB.getMembers().add(playerX);
+                try {
+                    if (teamA != null && teamB != null && playerX != null && playerY != null) {
+                        // Critical: This modification MUST be sequential in the main thread.
+                        teamA.getMembers().remove(playerX);
+                        teamB.getMembers().remove(playerY);
+                        teamA.getMembers().add(playerY);
+                        teamB.getMembers().add(playerX);
 
-                    System.out.printf("LOG: Applied best swap (Improvement: %.2f) between %s (%s) and %s (%s).\n",
-                            bestSwap.improvementScore, playerX.getName(), teamA.getTeamName(), playerY.getName(), teamB.getTeamName());
-                } else {
-                    System.err.println("WARNING: Could not apply best swap due to missing object references. Stopping optimization.");
+                        System.out.printf("LOG: Applied best swap (Improvement: %.2f) between %s (%s) and %s (%s).\n",
+                                bestSwap.improvementScore, playerX.getName(), teamA.getTeamName(), playerY.getName(), teamB.getTeamName());
+                    } else {
+                        System.err.println("WARNING: Could not apply best swap due to missing object references. Stopping optimization.");
+                        improvementFound = false;
+                    }
+                } catch (NullPointerException e) {
+                    System.err.println("Error:" +e.getMessage());
                     improvementFound = false;
                 }
             } else {

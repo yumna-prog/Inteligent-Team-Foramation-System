@@ -18,50 +18,57 @@ import static com.gameclub.team.service.FileService.calculateFileHash;
 
 public class Application {
 
-     public static void main(String[] args) {
+    public static void main(String[] args) {
 
-         Scanner sc = new Scanner(System.in);
-         System.out.println("Welcome to Team Formation System");
+        Scanner sc = new Scanner(System.in);
+        System.out.println("\n==============================");
+        System.out.println("   Welcome to TeamMate!   ");
+        System.out.println("==============================");
 
-         while (true) {
-             try{
-                 System.out.println("Select the role you represent");
-                 System.out.println("1. Organizer");
-                 System.out.println("2. Participant");
-                 System.out.println("Enter your choice (1 or 2): ");
+        List<Participant> participants = new ArrayList<>();
+        int team_size = 0;
 
-                 String input = sc.nextLine().trim();
+        int choice = -1;
 
-                 //To validate the numeric output
-                 int choice = Integer.parseInt(input);
+        while (true) {
+            showMenu();
+            String input = sc.nextLine().trim();
+            //To validate the numeric output
+            if (!input.matches("[0-9]+")) {
+                System.out.println("Invalid choice.  Please enter a number (1 or 2).\n");
+            }
 
-                 switch (choice) {
-                     case 1:
-                         organizerFlow(sc);
-                         return;
+            choice = Integer.parseInt(input);
+            switch (choice) {
+                case 1:
+                    organizerFlow(sc);
+                    return;
 
-                     case 2:
-                         participantFlow(sc);
-                         return;
+                case 2:
+                    participantFlow(sc,participants,team_size);
+                    return;
 
-                     default:
-                         System.out.println("Wrong choice. Try again");
-                 }
+                default:
+                    System.out.println("Wrong choice. Try again");
+            }
 
 
-             }
-             catch(NumberFormatException e ){
-                 System.out.println("Input must be an integer between 1 and 2. Please try again");
+        }
 
-             }catch (Exception e){
-                 System.out.println("Unexpected error: " + e.getMessage());
-             }
+
+
+    }
+
+
+         private static void showMenu(){
+
+             System.out.println("  Select the role you represent");
+             System.out.println("1. Organizer");
+             System.out.println("2. Participant");
+             System.out.println("Enter your choice (1 or 2): ");
          }
 
 
-
-
-     }
 
          //Organizer workflow
          public static void organizerFlow(Scanner scanner) {
@@ -71,14 +78,22 @@ public class Application {
              boolean dataLoaded = false;
 
              while (true) {
-                 System.out.print("\n--- Organizer Mode ---");
-                 System.out.print("\nSelect your specific requirement:");
-                 System.out.println("\n1. Upload participant data file");
+
+                 System.out.println("\n================================");
+                 System.out.print("        ORGANIZER MODE        ");
+                 System.out.println("\n================================");
+                 System.out.print("\nSelect your specific requirement:\n");
+                 System.out.println("1. Upload participant data file");
                  System.out.println("2. Initiate Team Formation");
-                 System.out.println("3. Exit Organizer Mode");
-                 System.out.println("\nEnter your choice (1 , 2,3): ");
+                 System.out.println("3. Return to Main flow");
+                 System.out.println("\nEnter your choice (1 ,2 or 3): ");
 
                  String choice = scanner.nextLine().trim();
+
+                 if (choice.equalsIgnoreCase("3")) {
+                     System.out.println("Exiting Organizer Mode. Returning to main menu.");
+                     return ;
+                 }
 
                  switch (choice) {
                      case "1":
@@ -94,7 +109,7 @@ public class Application {
                          // Step 1: Calculate hash
                          try {
                              String fileHash = calculateFileHash(fullPath);
-                             System.out.println("File hash: " + fileHash);
+                             System.out.println("Computed file hash: " + fileHash);
 
                              // Step 2: Compare with expected baseline (stored somewhere safe)
                              String expectedHash = "362c69e8ef9bed7f7c63e55ae23004cc1446d5cc81e70ec1cf3904cf34fbdf3f"; // baseline hash value
@@ -108,9 +123,6 @@ public class Application {
                              System.out.println("Error computing file hash: " + e.getMessage());
                              break;
                          }
-
-
-
                          System.out.println("Loading participant data from file... (Using internal mock data for demo)");
 
                          try {
@@ -118,27 +130,26 @@ public class Application {
                              participants = orgController.uploadParticipantData(fullPath);
                              dataLoaded = true;
 
-                             if (participants.isEmpty()) {
-                                 System.out.println("Participant data could not be loaded as it doesn't contain valid participant records. Please try again.");
+                             if (participants == null || participants.isEmpty()) {
+                                 System.out.println("The file contains no valid participant data.");
                                  dataLoaded = false;
-                             } else {
+                             }
+
+                             else {
                                  System.out.println("Participant data loaded successfully.");
                                  System.out.println("Loaded " + participants.size() + " participants");
 
-                                 // CODE TO DISPLAY RESULTS ---
-                                 System.out.println("\n--- Loaded Participants Snippet (First 5) ---");
-                                 int displayLimit = Math.min(participants.size(), 5);
-                                 for (int i = 0; i < displayLimit; i++) {
-                                     Participant p = participants.get(i);
-                                     System.out.printf("  - ID: %s, Name: %s, Game: %s, Skill: %d, Role: %s\n",
+                                 System.out.println("\n-- Showing first 5 participants ---");
+                                 participants.stream().limit(5).forEach(p ->
+                                     System.out.printf("ID: %s | Name: %s | Game: %s | Skill: %d | Role: %s\n",
                                              p.getPlayerId(),
                                              p.getName(),
                                              p.getPreferredGame(),
                                              p.getSkillLevel(),
-                                             p.getPreferredRole()
-                                     );
-                                 }
+                                             p.getPreferredRole())
+                                 );
                                  System.out.println("-------------------------------------------\n");
+
                              }
 
                          } catch (Exception e) {
@@ -158,33 +169,32 @@ public class Application {
                          }
 
                          System.out.println("\nEnter the desired team size");
-                         int team_size;
-
                          try{
                              String sizeInput = scanner.nextLine().trim();
+
                              if (sizeInput.isEmpty()) {
                                  System.out.println("Team size cannot be empty. Please try again.");
                                  break;
                              }
 
-                             team_size = Integer.parseInt(sizeInput);
+                             int team_size = Integer.parseInt(sizeInput);
 
                              if(team_size < 2) {
                                  System.out.println("The minimum team size must be 2. Please try again.");
                                  break;
                              }
+
+                             System.out.println("\nForming teams... please wait.");
+                             TeamFormationResult result = orgController.initiateTeamFormation(participants, team_size);
+
+                             TeamBuilder.displayTeams(result);
+
                          } catch (NumberFormatException e) {
                              System.out.println("Invalid input. Enter a numeric value for team size. Please try again.");
-                             break;
+
                          }
-
-                         // Call the controller method
-                         TeamFormationResult result = orgController.initiateTeamFormation(participants, team_size); /*2 seq*/
-
-                         // Display the results, using the static helper from TeamBuilder
-                         TeamBuilder.displayTeams(result);
-
                          break;
+
 
                      case "3":
                          System.out.println("Exiting Organizer Mode. Returning to main menu.");
@@ -198,25 +208,39 @@ public class Application {
          }
 
          //Participant workflow
-         public static void participantFlow(Scanner scanner) {
-             System.out.print("\n--- Participant Mode ---");
+         public static void participantFlow(Scanner scanner,List<Participant> participants, int team_size) {
+
+             SurveyController survey = new SurveyController();
+             OrganizerController orgController = new OrganizerController();
+
+
+
+             System.out.println("\n================================");
+             System.out.print("\n    PARTICIPANT MODE   ");
+             System.out.println("\n================================");
              System.out.print("\nSelect your specific requirement:");
              System.out.println("\n1. Fill the participant Survey");
              System.out.println("2. View Formed Teams");
-             System.out.println("\nEnter your choice (1 or 2): ");
+             System.out.println("3. Return to Main flow");
+             System.out.println("\n---------------------------------");
+             System.out.println("\nEnter your choice (1 , 2 or 3): ");
 
              String choice = scanner.next().trim();
+
+             if (choice.equalsIgnoreCase("exit")||choice.equalsIgnoreCase("back")) {
+                 System.out.println("Exiting Participant Mode. Returning to main menu.");
+                 return ;
+             }
+
 
              switch(choice){
                  case "1":
                      System.out.println("\nPlease enter your details to proceed with the survey ");
 
-                     SurveyController survey = new SurveyController();
 
                      try{
                          Participant player = survey.runSurvey();
                          System.out.println("\nSurvey has been successfully completed");
-                         System.out.println("Survey details have been successfully saved");
                          survey.displaySurvey(player);
                      }catch(Exception e){
                          System.out.println("\nSurvey could not be completed " + e.getMessage());
@@ -227,9 +251,17 @@ public class Application {
 
 
                  case "2":
-                     System.out.println("===== Formed Teams =====");
-                     //
+                     System.out.println("\n===== Formed Teams =====");
+                     // safety check
+                     if (participants == null || participants.isEmpty()) {
+                         System.out.println("❌ No participant data available. Teams cannot be displayed.");
+                         break;
+                     }
 
+                     TeamFormationResult result = orgController.initiateTeamFormation(participants, team_size);
+
+                     TeamBuilder.displayOnlyTeams(result);
+                     break;
 
                  default:
                      System.out.println("\nInvalid choice! Please select 1 or 2.");

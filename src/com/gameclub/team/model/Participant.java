@@ -29,7 +29,7 @@ public class Participant {
 
     //constants for normalization of personalityScore and skill level
     private static final int max_raw_personalityScore = 25;
-    private static final int max_raw_skillLevel = 10;
+
 
 
     //During survey to collect participant data

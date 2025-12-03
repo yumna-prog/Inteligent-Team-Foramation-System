@@ -97,7 +97,7 @@ public class ValidationService{
     public String validate_email(String inputEmail) {
         String email_pattern = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
 
-        if (inputEmail.isEmpty()) {
+        if (inputEmail == null || inputEmail.isEmpty()) {
             throw new IllegalArgumentException("The participant email cannot be empty");
         }
         if (! inputEmail.matches(email_pattern)) {
@@ -107,32 +107,18 @@ public class ValidationService{
     }
 
 
-    // The validations for Survey data-> personality queries , interest and role selection
-    // rate for each question be in (1-5) scale
-    // the selecting of role should be in scale(1-5)
-    //for the interest scale(1-5)
-    public int validateScore(String rawInput, int min, int max) {
-        int score;
-        //Check if the input is an integer
-        try {
-            score = Integer.parseInt(rawInput.trim());
-        } catch (NumberFormatException e) {
-            throw new InputMismatchException("Input must be a whole number");
-
-        }
-        //Check if the input is within the scale of (1-5)
-        if (score < min || score > max) {
-            throw new InputMismatchException("Input must be between" + min + " and" + max);
-        }
-        return score;
-    }
-
     public boolean validateSkillLevel(int inputSkillLevel) {
-        return inputSkillLevel >= 1 && inputSkillLevel <= 10;
+        if (inputSkillLevel < 1 || inputSkillLevel > 10) {
+            throw new IllegalArgumentException("Skill level must be between 1 and 10");
+        }
+        return true;
     }
 
     public boolean validateNormalizedScore(double score) {
-        return score >= 50.0 && score <= 100;
+        if (score < 50.0 || score > 100.0) {
+            throw new IllegalArgumentException("Score must be between 50 and 100");
+        }
+        return true;
 
     }
 }
