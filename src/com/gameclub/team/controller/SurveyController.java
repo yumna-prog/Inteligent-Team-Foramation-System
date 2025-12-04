@@ -7,13 +7,9 @@ import com.gameclub.team.service.FileService;
 import com.gameclub.team.service.FileServiceInt;
 import com.gameclub.team.service.PersonalityClassifier;
 import com.gameclub.team.service.ValidationService;
-
-import javax.lang.model.type.IntersectionType;
-import java.awt.*;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.spec.EdECPoint;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,9 +23,8 @@ public class SurveyController {
 
      // Default constructor for main application
      public SurveyController() {
-         this(System.in); // delegates to the other constructor
+         this(System.in);
      }
-    //FOR TESTING PURPOSES
 
     public SurveyController(InputStream in) {
         this.scanner = new Scanner(in);
@@ -38,8 +33,6 @@ public class SurveyController {
 
     //GET PARTICIPANT DATA
     public Participant getParticipantData(){
-
-         //===============================================================//
         //Singleton applied//
         ValidationService validator = ValidationService.getInstance(file_path);
 
@@ -49,7 +42,6 @@ public class SurveyController {
 
         while(true) {
             try {
-                //Participant main details
                 System.out.print("\nEnter Player Name: ");
                 name = scanner.nextLine();
                 validator.validate_name(name);
@@ -99,16 +91,13 @@ public class SurveyController {
     public Participant runSurvey() {
 
         //Survey interaction
-        //1. Display the questions
-        //create the current participant object
-        //get the Validation service interface
-        //ask the questions with try and catch
+        //Display the questions
+        //Create the current participant object
+        //Get the Validation service interface
+        //Ask the questions with try and catch
 
         try {
-
-            //access data in the method above
             Participant basicParticipantData = getParticipantData();
-            //===========================================//
             //Interface usage
             FileServiceInt fileService = new FileService(file_path);
 
@@ -118,7 +107,6 @@ public class SurveyController {
             System.out.println("==========================================");
 
             //personality ranking
-
             System.out.print("\nPersonality Traits : Rate each statement from 1 (Strongly Disagree) to 5 (Strongly Agree)\n");
             int q1 = this.promptPersonalityRating("\nQ1. I enjoy taking the lead and guiding others during group activities.");
             int q2 = this.promptPersonalityRating("Q2. I prefer analyzing situations and coming up with strategic solutions.");
@@ -157,12 +145,11 @@ public class SurveyController {
             int roleIndex = this.promptForSelection("", 1, role_options.length);
             Role selectedRole = role_options[roleIndex - 1];
 
-            // in the file
+
             String role_option_csv = selectedRole.getRole();
 
 
             // DATA PROCESSING
-
             //CREATE player object
             Participant player = new Participant(
                     basicParticipantData.getPlayerId(),
@@ -184,12 +171,12 @@ public class SurveyController {
             try {
                 fileService.writeSurveyDataToCSV(player);
             } catch (IOException e) {
-                System.err.println("ERROR: Could not save participant data to file. Cause: " + e.getMessage());
+                System.err.println("Error: Could not save participant data to file. Cause: " + e.getMessage());
             }
 
             return player;
         } catch (Exception e) {
-            System.err.println("Unexpected error during survey:" + e.getMessage());
+            System.err.println("Unexpected error during survey" + e.getMessage());
             return null;
         }
     }
@@ -201,7 +188,7 @@ public class SurveyController {
 
        while(attempts < maxAttempts) {
            System.out.println(question);
-           System.out.print("\nEnter a rating (1-5) or type 'exit' to cancel: ");
+           System.out.print("\nEnter a rating (1-5) ");
 
             try{
                 String input = scanner.nextLine().trim();

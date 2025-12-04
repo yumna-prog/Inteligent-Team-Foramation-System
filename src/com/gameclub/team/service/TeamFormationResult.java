@@ -8,8 +8,6 @@ import java.util.List;
 
 //This act as a container that contains the result of team formation which are teams formed and unassigned participants
 
-
-
 public class TeamFormationResult {
 
     public final List<Team> teams;

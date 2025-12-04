@@ -46,7 +46,7 @@ public class SwapEvaluationTask implements Callable<BestSwapInfo> {
 
         // T2: THREAD INTERRUPTION TEST HOOK
         if (T2_TEST_MODE && Math.random() < 0.005) { // Crash ~0.5% of tasks
-            throw new RuntimeException("T2 TEST FAIL: Simulated unexpected worker thread crash!");
+            throw new RuntimeException("TEST FAIL: Simulated unexpected worker thread crash!");
         }
 
 
@@ -67,7 +67,7 @@ public class SwapEvaluationTask implements Callable<BestSwapInfo> {
             if (playerCopyX != null) {
                 // Change the skill level to an easily recognizable value (0)
                 playerCopyX.setSkill(0);
-                System.out.println("T1 Hook: Corrupted player copy " + playerX.getName() + " skill to 0.0");
+
             }
         }
 

@@ -1,28 +1,26 @@
 package com.gameclub.team.main;
-
 import com.gameclub.team.controller.OrganizerController;
 import com.gameclub.team.controller.SurveyController;
 import com.gameclub.team.controller.TeamBuilder;
 import com.gameclub.team.model.Participant;
-import com.gameclub.team.model.Team;
-import com.gameclub.team.service.FileService;
 import com.gameclub.team.service.TeamFormationResult;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import static com.gameclub.team.controller.TeamBuilder.displayOnlyTeams;
 import static com.gameclub.team.service.FileService.calculateFileHash;
 
 
 public class Application {
 
+    private  static TeamFormationResult lastFormedTeams = null;
     public static void main(String[] args) {
 
         Scanner sc = new Scanner(System.in);
         System.out.println("\n==============================");
-        System.out.println("   Welcome to TeamMate!   ");
+        System.out.println("     Welcome to TeamMate!   ");
         System.out.println("==============================");
 
         List<Participant> participants = new ArrayList<>();
@@ -36,16 +34,20 @@ public class Application {
             //To validate the numeric output
             if (!input.matches("[0-9]+")) {
                 System.out.println("Invalid choice.  Please enter a number (1 or 2).\n");
+                continue;
             }
 
             choice = Integer.parseInt(input);
             switch (choice) {
                 case 1:
                     organizerFlow(sc);
-                    return;
+                    break;
 
                 case 2:
                     participantFlow(sc,participants,team_size);
+                    break;
+
+                case 3:
                     return;
 
                 default:
@@ -56,16 +58,16 @@ public class Application {
         }
 
 
-
     }
-
 
          private static void showMenu(){
 
-             System.out.println("  Select the role you represent");
+             System.out.println("\nSelect the role you represent or exit");
              System.out.println("1. Organizer");
              System.out.println("2. Participant");
+             System.out.println("3. Exit");
              System.out.println("Enter your choice (1 or 2): ");
+
          }
 
 
@@ -80,7 +82,7 @@ public class Application {
              while (true) {
 
                  System.out.println("\n================================");
-                 System.out.print("        ORGANIZER MODE        ");
+                 System.out.print("         ORGANIZER MODE        ");
                  System.out.println("\n================================");
                  System.out.print("\nSelect your specific requirement:\n");
                  System.out.println("1. Upload participant data file");
@@ -123,7 +125,7 @@ public class Application {
                              System.out.println("Error computing file hash: " + e.getMessage());
                              break;
                          }
-                         System.out.println("Loading participant data from file... (Using internal mock data for demo)");
+                         System.out.println("Loading participant data from file...");
 
                          try {
                              // This uses the CSVParser with mock data
@@ -188,6 +190,7 @@ public class Application {
                              TeamFormationResult result = orgController.initiateTeamFormation(participants, team_size);
 
                              TeamBuilder.displayTeams(result);
+                             lastFormedTeams =  result;
 
                          } catch (NumberFormatException e) {
                              System.out.println("Invalid input. Enter a numeric value for team size. Please try again.");
@@ -211,9 +214,6 @@ public class Application {
          public static void participantFlow(Scanner scanner,List<Participant> participants, int team_size) {
 
              SurveyController survey = new SurveyController();
-             OrganizerController orgController = new OrganizerController();
-
-
 
              System.out.println("\n================================");
              System.out.print("\n    PARTICIPANT MODE   ");
@@ -251,17 +251,16 @@ public class Application {
 
 
                  case "2":
-                     System.out.println("\n===== Formed Teams =====");
-                     // safety check
-                     if (participants == null || participants.isEmpty()) {
-                         System.out.println("❌ No participant data available. Teams cannot be displayed.");
-                         break;
+
+                     if (lastFormedTeams == null || lastFormedTeams.getTeams().isEmpty()) {
+                         System.out.println("Teams have not been formed yet. Please ask the organizer to initiate team formation.");
+                     } else {
+                         displayOnlyTeams(lastFormedTeams);
                      }
-
-                     TeamFormationResult result = orgController.initiateTeamFormation(participants, team_size);
-
-                     TeamBuilder.displayOnlyTeams(result);
                      break;
+
+
+
 
                  default:
                      System.out.println("\nInvalid choice! Please select 1 or 2.");

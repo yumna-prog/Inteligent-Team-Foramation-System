@@ -1,41 +1,28 @@
 package com.gameclub.team.service;
-
 import com.gameclub.team.model.Participant;
 import com.gameclub.team.model.Team;
-
-import javax.sound.midi.InvalidMidiDataException;
 import java.io.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.stream.Collectors;
-// create personalityClassifier object, participant list
-//read the file line by line
-// check missing values, incorrect format and out of range errors
-// extract data and assign to respective participant attributes
-// create participant object loading the extracted data
-//add the created objects to the list
-
 
 //File Handling
+//Abstraction
 public class FileService implements FileServiceInt {
 
 
     private String file_path;
-    private static String[] csv_header = {"ID","Name","Email","PreferredGame","SkillLevel","PreferredRole","PersonalityScore","PersonalityType"};
-    private static final int max_persona_score = 25;
+    private static String[] csv_header = {"ID", "Name", "Email", "PreferredGame", "SkillLevel", "PreferredRole", "PersonalityScore", "PersonalityType"};
 
     public FileService(String file_path) {
         this.file_path = file_path;
     }
 
-    public FileService() {
-
-    }
-
-    public void writeSurveyDataToCSV(Participant participant) throws IOException {
+    public void writeSurveyDataToCSV(Participant participant){
         try (FileWriter fw = new FileWriter(file_path, true);
              PrintWriter pw = new PrintWriter(fw)) {
 
@@ -43,7 +30,7 @@ public class FileService implements FileServiceInt {
             //Write header if file empty
             File file = new File(file_path);
             if (file.length() == 0) {
-                pw.println(String.join(",",csv_header));
+                pw.println(String.join(",", csv_header));
             }
             double normalizedScore = participant.getNormalizedScore();
 
@@ -60,25 +47,22 @@ public class FileService implements FileServiceInt {
                     participant.getPersonalityType()
             );
 
-            //write the csv line
             pw.println(csvLine);
 
 
-
         } catch (IOException e) {
-            System.err.println(" Could not write data to CSV file" + e.getMessage());
+            System.err.println(" Could not write data to csv file" + e.getMessage());
+
         }
     }
 
 
-    //UPLOAD THE DATA
-
-
+    //Upload the data
     public List<Participant> loadParticipants() {
         List<Participant> participants = new ArrayList<>();
-        final int fieldCount = 8; // only data from 7 fields are needed, the variable should be used across all objects
+        final int fieldCount = 8; // only data from 7 fields are needed
         ValidationService validator = new ValidationService(this.file_path);
-        //ensure the file is closed soon after reading
+
         try (BufferedReader br = new BufferedReader(new FileReader(file_path))) {
 
             String line;
@@ -91,7 +75,7 @@ public class FileService implements FileServiceInt {
                 }
                 String[] values = line.split(",");
 
-                //check for missing fields -> how does it have to be handled
+                //Check for missing fields -> how does it have to be handled
                 if (values.length < fieldCount) {
                     System.err.println("Skipping invalid line: " + line);
                     continue;
@@ -106,25 +90,45 @@ public class FileService implements FileServiceInt {
                     double normalizedScore = Double.parseDouble(values[6].trim());
                     String personalityType = values[7].trim();
 
-                    //Validate data
-                    validator.validate_id(playerId,false);
-                    validator.validate_name(name);
-                    validator.validate_email(email);
+                    boolean valid = true;
 
-                    if(!validator.validateSkillLevel(skillLevel)||
-                    !validator.validateNormalizedScore(normalizedScore)) {
-                        System.err.println("Validation Failed for line: " + line);
+                    try {
+                        //Validate data
+                        validator.validate_id(playerId, false);
+                    }catch (Exception e) {
+                        System.err.println("Invalid id");
+                        valid = false;
+                    }
+
+                    try {
+                        validator.validate_name(name);
+                    }catch (Exception e) {
+                        System.err.println("Invalid name");
+                        valid = false;
+                    }
+                    try {
+                        validator.validate_email(email);
+                    }catch (Exception e) {
+                        System.err.println("Invalid email");
+                        valid = false;
+                    }
+
+                    if (!validator.validateSkillLevel(skillLevel) ||
+                            !validator.validateNormalizedScore(normalizedScore)) {
+                        System.err.println("Error: Validation failed");
                         continue;
                     }
 
                     //Create Participant object using extracted data
-                    Participant participant = new Participant(playerId, name, email, preferredGame, skillLevel, preferredRole,normalizedScore,personalityType);
+                    Participant participant = new Participant(playerId, name, email, preferredGame, skillLevel, preferredRole, normalizedScore, personalityType);
 
                     //Add object to the list
                     participants.add(participant);
 
-                }catch (NumberFormatException e){
-                    System.err.println("Format error in line: " + line);
+                } catch (NumberFormatException e) {
+                    System.err.println("Error: Format error");
+                }catch (IllegalArgumentException e) {
+                    System.err.println("Error :Problem reading participant file");
                 }
 
             }
@@ -141,29 +145,30 @@ public class FileService implements FileServiceInt {
 
     //==================================SAVE THE FORMED TEAMS==================================//
     //Save the formed teams and the unassigned participants to a csv file
-    // Each row includes the player details and the assigned Team name.
+    // Each row includes the player details and the assigned Team name
+
 
     public void saveFormedTeams(TeamFormationResult result, String filePath) throws IOException {
 
         //Define the delimiter used in CSV files
         final String delimiter = ",";
 
-        try(BufferedWriter writer =  new BufferedWriter(new FileWriter(filePath))){
-
-            writer.write("Team Name"+ delimiter + "Name" + delimiter + "Role" + delimiter + "Personality"+ delimiter + "Skill Level" + delimiter + "Preferred Game"+ delimiter + "Composite Score");
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            writer.write("Team Name" + delimiter + "Name" + delimiter + "Role" + delimiter + "Personality" + delimiter + "Skill Level" + delimiter + "Preferred Game" + delimiter + "Composite Score");
             writer.newLine();
-            for(Team team : result.teams){
-                String teamName = team.getTeamName();
+
+            for (Team team : result.teams) {
+
                 for (Participant p : team.getMembers()) {
-                    // Row structure: TeamName, Name, Role, Personality, Skill, Game, CompositeScore
-                    String csvRow = teamName + delimiter +
-                            p.getName() + delimiter +
-                            p.getPreferredRole() + delimiter +
-                            p.getPersonalityType() + delimiter +
-                            p.getSkillLevel() + delimiter +
-                            p.getPreferredGame();
 
-
+                    String csvRow = String.join(delimiter,
+                            team.getTeamName(),
+                            p.getName(),
+                            p.getPreferredRole(),
+                            p.getPersonalityType(),
+                            String.valueOf(p.getSkillLevel()),
+                            p.getPreferredGame()
+                    );
                     writer.write(csvRow);
                     writer.newLine();
 
@@ -171,65 +176,53 @@ public class FileService implements FileServiceInt {
             }
             //Write Unassigned Participants
             if (!result.unassignedParticipants.isEmpty()) {
-                String unassignedTeamName = "UNASSIGNED";
-                for (Participant p : result.unassignedParticipants) {
+               for (Participant p : result.unassignedParticipants) {
                     // No team name so unassigned
-                    String csvRow = unassignedTeamName + delimiter +
-                            p.getName() + delimiter +
-                            p.getPreferredRole() + delimiter +
-                            p.getPersonalityType() + delimiter +
-                            p.getSkillLevel() + delimiter +
-                            p.getPreferredGame();
-
+                    String csvRow = String.join(delimiter,
+                            "UNASSIGNED",
+                            p.getName(),
+                            p.getPreferredRole(),
+                            p.getPersonalityType(),
+                            String.valueOf(p.getSkillLevel()),
+                            p.getPreferredGame()
+                    );
                     writer.write(csvRow);
                     writer.newLine();
 
 
                 }
             }
-        }catch(IOException e){
-            System.out.println("Error saving the formed teams to a file: "+"Cause: " + e.getMessage());
-            throw e;
+        } catch (IOException e) {
+            System.out.println("Error saving the formed teams to a file: " + "Cause: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
+    //File Integrity checker helper method
+    public static String calculateFileHash(String filePath){
+        try(FileInputStream fis = new FileInputStream(filePath)) {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] byteBuffer = new byte[1024];
+            int bytesRead;
 
+            while ((bytesRead = fis.read(byteBuffer)) != -1) {
+                digest.update(byteBuffer, 0, bytesRead);
+            }
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest.digest()) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (FileNotFoundException e) {
+            System.err.println("Error : File not found for hashing : " + filePath);
+        }catch (IOException e){
+            System.err.println("Issue while hashing file");
+        }catch (NoSuchAlgorithmException e){
+            System.err.println("Error: algorithm not available.");
+        }
+        return null;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    }
 }
 
 
