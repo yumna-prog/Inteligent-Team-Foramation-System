@@ -184,7 +184,7 @@ public class TeamBuilder{
         System.out.println("================================================");
 
         if (!unassignedLeaders.isEmpty()) {
-            System.out.println("The following Leaders could not be assigned (Max 1 Leader per team constraint):");
+            System.out.println("The following leaders could not be assigned (Max 1 Leader per team constraint):");
             unassignedLeaders.forEach(p ->
                     System.out.printf("  - %s (Role: %s, Game: %s, Skill: %d)%n",
                             p.getName(),
@@ -229,7 +229,6 @@ public class TeamBuilder{
     //Iteratively optimizes the teams using concurrent processing to find the best swap in each round quickly.
     public void optimizeTeamsConcurrent(List<Team> teams) { /*2.4 seq*/
 
-        //ExecutorServ2ice Setup
         int poolSize = Runtime.getRuntime().availableProcessors();
         ExecutorService executor = Executors.newFixedThreadPool(poolSize);
 
@@ -328,7 +327,7 @@ public class TeamBuilder{
             executor.shutdownNow();
             Thread.currentThread().interrupt();
         }
-        System.out.println("LOG: Concurrent Optimization finished. Thread pool shut down.");
+        System.out.println("Concurrent Optimization finished. Thread pool shut down.");
     }
 
     // Helper method to safely retrieve the team object by name
