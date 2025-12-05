@@ -1,5 +1,4 @@
 package com.gameclub.team.controller;
-
 import com.gameclub.team.model.InterestGame;
 import com.gameclub.team.model.Participant;
 import com.gameclub.team.model.Role;
@@ -9,7 +8,6 @@ import com.gameclub.team.service.PersonalityClassifier;
 import com.gameclub.team.service.ValidationService;
 import java.io.IOException;
 import java.io.InputStream;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,7 +29,7 @@ public class SurveyController {
     }
 
 
-    //GET PARTICIPANT DATA
+    //Get participant data
     public Participant getParticipantData(){
         //Singleton applied//
         ValidationService validator = ValidationService.getInstance(file_path);
@@ -89,7 +87,6 @@ public class SurveyController {
 
 
     public Participant runSurvey() {
-
         //Survey interaction
         //Display the questions
         //Create the current participant object
@@ -149,8 +146,8 @@ public class SurveyController {
             String role_option_csv = selectedRole.getRole();
 
 
-            // DATA PROCESSING
-            //CREATE player object
+            // Data processing
+            //Create player object
             Participant player = new Participant(
                     basicParticipantData.getPlayerId(),
                     basicParticipantData.getName(),
