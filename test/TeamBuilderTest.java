@@ -1,6 +1,5 @@
 import com.gameclub.team.controller.TeamBuilder;
 import com.gameclub.team.model.Participant;
-import com.gameclub.team.model.Team;
 import com.gameclub.team.service.TeamFormationResult;
 
 import java.util.ArrayList;
@@ -13,7 +12,7 @@ public class TeamBuilderTest {
         TeamBuilder builder = new TeamBuilder();
 
         // Create sample participants
-        Participant p1 = new Participant("P001","Humaira","h@uni.edu","FIFA",5,"Supporter",56.0,"Thinker");
+        Participant p1 = new Participant("P001","Lia","l@uni.edu","FIFA",5,"Supporter",56.0,"Thinker");
         Participant p2 = new Participant("P002","Ali","a@uni.edu","Valorant",7,"Leader",95.0,"Leader");
         Participant p3 = new Participant("P003","Sara","s@uni.edu","FIFA",6,"Strategist",80.0,"Balanced");
         Participant p4 = new Participant("P004","John","j@uni.edu","Basketball",8,"Defender",70.0,"Leader");
